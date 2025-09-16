@@ -131,8 +131,40 @@
         .chart-container {
             position: relative;
             height: 400px;
-            margin: 40px 0;
+            margin: 40px 0 20px 0;
         }
+        
+        /* Data source toggle buttons */
+        .data-source-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 40px 0;
+        }
+        
+        .source-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: 500;
+            border: 2px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .source-button:hover {
+            border-color: #999;
+            background: #f8f8f8;
+        }
+        
+        .source-button.active {
+            background: #333;
+            color: white;
+            border-color: #333;
+        }
+        
         .hover-instruction {
             text-align: center;
             color: #999;
@@ -301,7 +333,16 @@
             
             .chart-container {
                 height: 300px;
-                margin: 30px 0;
+                margin: 30px 0 15px 0;
+            }
+            
+            .data-source-toggle {
+                margin: 15px 0 30px 0;
+            }
+            
+            .source-button {
+                padding: 8px 16px;
+                font-size: 14px;
             }
             
             .map-title {
@@ -378,23 +419,23 @@
         <div class="desktop-header">
             <div class="title-section">
                 <h1>2026 US Senate Forecast</h1>
-                <h2>by Jack Whitcomb</h2>
+                <h2 id="forecastAuthor">by Jack Whitcomb</h2>
                 <div class="election-date">Election date: November 3, 2026 (last updated 9/14/2025)</div>
             </div>
             <div class="current-odds">
                 <div class="current-odds-label">Odds that Republicans retain control:</div>
-                <div class="current-odds-value">80%</div>
+                <div class="current-odds-value" id="currentOddsDesktop">80%</div>
             </div>
         </div>
         
         <!-- Mobile Header (hidden on desktop) -->
         <div class="mobile-header">
             <h1>2026 US Senate Forecast</h1>
-            <h2>by Jack Whitcomb</h2>
+            <h2 id="forecastAuthorMobile">by Jack Whitcomb</h2>
             <div class="election-date">Election date: November 3, 2026 (last updated 9/14/2025)</div>
             <div class="mobile-odds">
                 <div class="mobile-odds-label">Odds that Republicans retain control:</div>
-                <div class="mobile-odds-value">80%</div>
+                <div class="mobile-odds-value" id="currentOddsMobile">80%</div>
             </div>
         </div>
         
@@ -402,6 +443,11 @@
         
         <div class="chart-container">
             <canvas id="oddsChart"></canvas>
+        </div>
+        
+        <div class="data-source-toggle">
+            <button class="source-button active" id="jackForecast">Jack's forecast</button>
+            <button class="source-button" id="bettingOdds">Betting odds</button>
         </div>
         
         <div id="map-container">
@@ -453,149 +499,205 @@
     </div>
 
     <script>
-        // Chart setup
+        // Data sources
+        const dataSources = {
+            jack: {
+                name: "Jack's forecast",
+                author: "by Jack Whitcomb",
+                dates: ['Sept 13', 'Sept 14'],
+                republicanOdds: [80, 80],
+                democraticOdds: [20, 20],
+                currentOdds: 80,
+                stateOdds: {
+                    'Alabama': { rep: 99, dem: 1 },
+                    'Alaska': { rep: 92, dem: 8 },
+                    'Arkansas': { rep: 99, dem: 1 },
+                    'Colorado': { rep: 22, dem: 78 },
+                    'Delaware': { rep: 13, dem: 87 },
+                    'Florida': { rep: 92, dem: 8 },
+                    'Georgia': { rep: 55, dem: 45 },
+                    'Idaho': { rep: 99, dem: 1 },
+                    'Illinois': { rep: 22, dem: 78 },
+                    'Iowa': { rep: 92, dem: 8 },
+                    'Kansas': { rep: 95, dem: 5 },
+                    'Kentucky': { rep: 99, dem: 1 },
+                    'Louisiana': { rep: 99, dem: 1 },
+                    'Maine': { rep: 34, dem: 66 },
+                    'Massachusetts': { rep: 2, dem: 98 },
+                    'Michigan': { rep: 64, dem: 36 },
+                    'Minnesota': { rep: 11, dem: 89 },
+                    'Mississippi': { rep: 99, dem: 1 },
+                    'Montana': { rep: 87, dem: 13 },
+                    'Nebraska': { rep: 98, dem: 2 },
+                    'New Hampshire': { rep: 11, dem: 89 },
+                    'New Jersey': { rep: 38, dem: 62 },
+                    'New Mexico': { rep: 38, dem: 62 },
+                    'North Carolina': { rep: 70, dem: 30 },
+                    'Ohio': { rep: 90, dem: 10 },
+                    'Oklahoma': { rep: 99, dem: 1 },
+                    'Oregon': { rep: 14, dem: 86 },
+                    'Rhode Island': { rep: 15, dem: 85 },
+                    'South Carolina': { rep: 97, dem: 3 },
+                    'South Dakota': { rep: 99, dem: 1 },
+                    'Tennessee': { rep: 99, dem: 1 },
+                    'Texas': { rep: 84, dem: 16 },
+                    'Virginia': { rep: 38, dem: 62 },
+                    'West Virginia': { rep: 99, dem: 1 },
+                    'Wyoming': { rep: 99, dem: 1 }
+                }
+            },
+            betting: {
+                name: "Betting odds",
+                author: "overall odds from Maxim Lott and John Stossel, state odds from Kalshi (updated weekly)",
+                dates: ['Sept 10', 'Sept 11', 'Sept 12', 'Sept 13', 'Sept 14', 'Sept 15', 'Sept 16'],
+                republicanOdds: [70.5, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8],
+                democraticOdds: [29.5, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2],
+                currentOdds: 70.8,
+                stateOdds: {
+                    'Alabama': { rep: 96, dem: 4 },
+                    'Alaska': { rep: 78, dem: 22 },
+                    'Arkansas': { rep: 96, dem: 4 },
+                    'Colorado': { rep: 4, dem: 96 },
+                    'Delaware': { rep: 3, dem: 97 },
+                    'Florida': { rep: 73, dem: 27 },
+                    'Georgia': { rep: 24, dem: 76 },
+                    'Idaho': { rep: 96, dem: 4 },
+                    'Illinois': { rep: 4, dem: 96 },
+                    'Iowa': { rep: 70, dem: 30 },
+                    'Kansas': { rep: 92, dem: 8 },
+                    'Kentucky': { rep: 95, dem: 5 },
+                    'Louisiana': { rep: 96, dem: 4 },
+                    'Maine': { rep: 44, dem: 56 },
+                    'Massachusetts': { rep: 9, dem: 91 },
+                    'Michigan': { rep: 22, dem: 78 },
+                    'Minnesota': { rep: 11, dem: 89 },
+                    'Mississippi': { rep: 95, dem: 5 },
+                    'Montana': { rep: 89, dem: 11 },
+                    'Nebraska': { rep: 82, dem: 18 },
+                    'New Hampshire': { rep: 19, dem: 81 },
+                    'New Jersey': { rep: 4, dem: 96 },
+                    'New Mexico': { rep: 8, dem: 92 },
+                    'North Carolina': { rep: 63, dem: 37 },
+                    'Ohio': { rep: 66, dem: 34 },
+                    'Oklahoma': { rep: 96, dem: 4 },
+                    'Oregon': { rep: 4, dem: 96 },
+                    'Rhode Island': { rep: 6, dem: 94 },
+                    'South Carolina': { rep: 91, dem: 9 },
+                    'South Dakota': { rep: 94, dem: 6 },
+                    'Tennessee': { rep: 96, dem: 4 },
+                    'Texas': { rep: 75, dem: 25 },
+                    'Virginia': { rep: 8, dem: 92 },
+                    'West Virginia': { rep: 96, dem: 4 },
+                    'Wyoming': { rep: 96, dem: 4 }
+                }
+            }
+        };
+        
+        let currentSource = 'jack';
+        let chart = null;
+        
+        // Initialize chart
         const ctx = document.getElementById('oddsChart').getContext('2d');
         
-        const dates = [
-            'Sept 13', 'Sept 14',
-        ];
-        
-        const republicanOdds = [80, 80];
-        const democraticOdds = [20, 20];
-        
-        const chart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: dates,
-                datasets: [{
-                    label: 'Republican',
-                    data: republicanOdds,
-                    borderColor: '#dc2626',
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    tension: 0.1,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: '#dc2626',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }, {
-                    label: 'Democratic',
-                    data: democraticOdds,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'transparent',
-                    borderWidth: 3,
-                    tension: 0.1,
-                    pointRadius: 0,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: '#2563eb',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: {
-                    mode: 'index',
-                    intersect: false,
-                },
-                plugins: {
-                    legend: {
-                        display: false
+        function updateChart(source) {
+            const data = dataSources[source];
+            
+            if (chart) {
+                chart.data.labels = data.dates;
+                chart.data.datasets[0].data = data.republicanOdds;
+                chart.data.datasets[1].data = data.democraticOdds;
+                chart.update();
+            } else {
+                chart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: data.dates,
+                        datasets: [{
+                            label: 'Republican',
+                            data: data.republicanOdds,
+                            borderColor: '#dc2626',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#dc2626',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }, {
+                            label: 'Democratic',
+                            data: data.democraticOdds,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#2563eb',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }]
                     },
-                    tooltip: {
-                        backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                        padding: 12,
-                        titleFont: {
-                            size: 14
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
                         },
-                        bodyFont: {
-                            size: 13
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                                padding: 12,
+                                titleFont: {
+                                    size: 14
+                                },
+                                bodyFont: {
+                                    size: 13
+                                },
+                                callbacks: {
+                                    label: function(context) {
+                                        return context.dataset.label + ': ' + context.parsed.y + '%';
+                                    }
+                                }
+                            }
                         },
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + '%';
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    },
+                                    font: {
+                                        size: 14
+                                    },
+                                    color: '#666'
+                                },
+                                grid: {
+                                    color: '#e5e5e5'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    color: '#666'
+                                },
+                                grid: {
+                                    display: false
+                                }
                             }
                         }
                     }
-                },
-                scales: {
-                    y: {
-                        min: 0,
-                        max: 100,
-                        ticks: {
-                            callback: function(value) {
-                                return value + '%';
-                            },
-                            font: {
-                                size: 14
-                            },
-                            color: '#666'
-                        },
-                        grid: {
-                            color: '#e5e5e5'
-                        }
-                    },
-                    x: {
-                        ticks: {
-                            font: {
-                                size: 14
-                            },
-                            color: '#666'
-                        },
-                        grid: {
-                            display: false
-                        }
-                    }
-                }
+                });
             }
-        });
-        
-        // State odds data
-        const stateOdds = {
-            'Alabama': { rep: 99, dem: 1 },
-            'Alaska': { rep: 92, dem: 8 },
-            'Arkansas': { rep: 99, dem: 1 },
-            'Colorado': { rep: 22, dem: 78 },
-            'Delaware': { rep: 13, dem: 87 },
-            'Florida': { rep: 92, dem: 8 },
-            'Georgia': { rep: 55, dem: 45 },
-            'Idaho': { rep: 99, dem: 1 },
-            'Illinois': { rep: 22, dem: 78 },
-            'Iowa': { rep: 92, dem: 8 },
-            'Kansas': { rep: 95, dem: 5 },
-            'Kentucky': { rep: 99, dem: 1 },
-            'Louisiana': { rep: 99, dem: 1 },
-            'Maine': { rep: 34, dem: 66 },
-            'Massachusetts': { rep: 2, dem: 98 },
-            'Michigan': { rep: 64, dem: 36 },
-            'Minnesota': { rep: 11, dem: 89 },
-            'Mississippi': { rep: 99, dem: 1 },
-            'Montana': { rep: 87, dem: 13 },
-            'Nebraska': { rep: 98, dem: 2 },
-            'New Hampshire': { rep: 11, dem: 89 },
-            'New Jersey': { rep: 38, dem: 62 },
-            'New Mexico': { rep: 38, dem: 62 },
-            'North Carolina': { rep: 70, dem: 30 },
-            'Ohio': { rep: 90, dem: 10 },
-            'Oklahoma': { rep: 99, dem: 1 },
-            'Oregon': { rep: 14, dem: 86 },
-            'Rhode Island': { rep: 15, dem: 85 },
-            'South Carolina': { rep: 97, dem: 3 },
-            'South Dakota': { rep: 99, dem: 1 },
-            'Tennessee': { rep: 99, dem: 1 },
-            'Texas': { rep: 84, dem: 16 },
-            'Virginia': { rep: 38, dem: 62 },
-            'West Virginia': { rep: 99, dem: 1 },
-            'Wyoming': { rep: 99, dem: 1 }
-        };
-        
-        // Sort states by party likelihood for the bar
-        const stateArray = Object.entries(stateOdds).map(([state, odds]) => ({
-            name: state,
-            ...odds
-        })).sort((a, b) => b.dem - a.dem);
+        }
         
         function getStateColor(repOdds) {
             if (repOdds === undefined) return '#999';
@@ -606,84 +708,150 @@
             return '#2563eb';
         }
         
-        // Create state bar segments
-        const stateBar = document.getElementById('stateBar');
-        const tooltip = d3.select(".tooltip");
-        const totalStates = stateArray.length;
-        const notUpForElectionLeft = 34;
-        const notUpForElectionRight = 31;
-        const totalSeats = 100;
-        const seatsInElection = totalStates;
-        
-        // Add dotted sections for seats not up for election
-        const leftSection = document.createElement('div');
-        leftSection.style.width = (notUpForElectionLeft / totalSeats * 100) + '%';
-        leftSection.style.background = 'repeating-linear-gradient(45deg, #60a5fa, #60a5fa 10px, #93c5fd 10px, #93c5fd 20px)';
-        leftSection.style.opacity = '0.3';
-        stateBar.appendChild(leftSection);
-        
-        // Create segments for each state
-        stateArray.forEach((state, index) => {
-            const segment = document.createElement('div');
-            segment.className = 'state-segment';
-            segment.style.width = (1 / totalSeats * 100) + '%';
-            segment.style.background = getStateColor(state.rep);
-            segment.dataset.stateName = state.name;
+        function updateStateBar(source) {
+            const stateOdds = dataSources[source].stateOdds;
+            const stateBar = document.getElementById('stateBar');
+            const tooltip = d3.select(".tooltip");
             
-            segment.addEventListener('mouseenter', function(event) {
-                // Show tooltip
-                tooltip
-                    .html(`<strong>${state.name}</strong><br>
-                        Republican: ${state.rep}%<br>
-                        Democrat: ${state.dem}%`)
-                    .style("left", (event.pageX + 10) + "px")
-                    .style("top", (event.pageY - 28) + "px")
-                    .classed("show", true);
+            // Clear existing bar
+            stateBar.innerHTML = '';
+            
+            // Sort states by party likelihood
+            const stateArray = Object.entries(stateOdds).map(([state, odds]) => ({
+                name: state,
+                ...odds
+            })).sort((a, b) => b.dem - a.dem);
+            
+            const totalStates = stateArray.length;
+            const notUpForElectionLeft = 34;
+            const notUpForElectionRight = 31;
+            const totalSeats = 100;
+            
+            // Add dotted sections for seats not up for election
+            const leftSection = document.createElement('div');
+            leftSection.style.width = (notUpForElectionLeft / totalSeats * 100) + '%';
+            leftSection.style.background = 'repeating-linear-gradient(45deg, #60a5fa, #60a5fa 10px, #93c5fd 10px, #93c5fd 20px)';
+            leftSection.style.opacity = '0.3';
+            stateBar.appendChild(leftSection);
+            
+            // Create segments for each state
+            stateArray.forEach((state, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'state-segment';
+                segment.style.width = (1 / totalSeats * 100) + '%';
+                segment.style.background = getStateColor(state.rep);
+                segment.dataset.stateName = state.name;
                 
-                // Highlight corresponding state on map
-                d3.selectAll('.state')
-                    .classed('highlight', function(d) {
-                        return d.properties.name === state.name;
-                    });
+                segment.addEventListener('mouseenter', function(event) {
+                    tooltip
+                        .html(`<strong>${state.name}</strong><br>
+                            Republican: ${state.rep}%<br>
+                            Democrat: ${state.dem}%`)
+                        .style("left", (event.pageX + 10) + "px")
+                        .style("top", (event.pageY - 28) + "px")
+                        .classed("show", true);
+                    
+                    d3.selectAll('.state')
+                        .classed('highlight', function(d) {
+                            return d.properties.name === state.name;
+                        });
+                });
+                
+                segment.addEventListener('mouseleave', function() {
+                    tooltip.classed("show", false);
+                    d3.selectAll('.state').classed('highlight', false);
+                });
+                
+                stateBar.appendChild(segment);
             });
             
-            segment.addEventListener('mouseleave', function() {
-                tooltip.classed("show", false);
-                d3.selectAll('.state').classed('highlight', false);
-            });
+            // Add right dotted section
+            const rightSection = document.createElement('div');
+            rightSection.style.width = (notUpForElectionRight / totalSeats * 100) + '%';
+            rightSection.style.background = 'repeating-linear-gradient(45deg, #f87171, #f87171 10px, #fca5a5 10px, #fca5a5 20px)';
+            rightSection.style.opacity = '0.3';
+            stateBar.appendChild(rightSection);
+			
+			// ADD THIS LINE HERE - Position majority line at 50%
+			const majorityLine = document.getElementById('majorityLine');
+			majorityLine.style.left = '50%';
+        }
+        
+        function updateMap(source) {
+            const stateOdds = dataSources[source].stateOdds;
+            const tooltip = d3.select(".tooltip");
             
-            stateBar.appendChild(segment);
+            d3.selectAll('.state')
+                .transition()
+                .duration(300)
+                .attr("fill", function(d) {
+                    const stateName = d.properties.name;
+                    const odds = stateOdds[stateName];
+                    if (odds) {
+                        return getStateColor(odds.rep);
+                    }
+                    return '#ccc';
+                });
+        }
+        
+        function updateDisplay(source) {
+            const data = dataSources[source];
+            
+            // Update author
+            document.getElementById('forecastAuthor').textContent = data.author;
+            document.getElementById('forecastAuthorMobile').textContent = data.author;
+            
+            // Update current odds
+            document.getElementById('currentOddsDesktop').textContent = data.currentOdds + '%';
+            document.getElementById('currentOddsMobile').textContent = data.currentOdds + '%';
+            
+            // Update chart
+            updateChart(source);
+            
+            // Update state bar
+            updateStateBar(source);
+            
+            // Update map
+            updateMap(source);
+        }
+        
+        // Button event listeners
+        document.getElementById('jackForecast').addEventListener('click', function() {
+            if (currentSource !== 'jack') {
+                currentSource = 'jack';
+                document.getElementById('jackForecast').classList.add('active');
+                document.getElementById('bettingOdds').classList.remove('active');
+                updateDisplay('jack');
+            }
         });
         
-        // Add right dotted section
-        const rightSection = document.createElement('div');
-        rightSection.style.width = (notUpForElectionRight / totalSeats * 100) + '%';
-        rightSection.style.background = 'repeating-linear-gradient(45deg, #f87171, #f87171 10px, #fca5a5 10px, #fca5a5 20px)';
-        rightSection.style.opacity = '0.3';
-        stateBar.appendChild(rightSection);
-        
-        // Position majority line
-        const majorityLine = document.getElementById('majorityLine');
-        majorityLine.style.left = '50%';
+        document.getElementById('bettingOdds').addEventListener('click', function() {
+            if (currentSource !== 'betting') {
+                currentSource = 'betting';
+                document.getElementById('bettingOdds').classList.add('active');
+                document.getElementById('jackForecast').classList.remove('active');
+                updateDisplay('betting');
+            }
+        });
         
         // Map setup with responsive dimensions
         function getMapDimensions() {
-            const container = document.getElementById('map-container');
-            const containerWidth = container.offsetWidth;
-            const isMobile = window.innerWidth <= 768;
-            
-            if (isMobile) {
-                return {
-                    width: Math.min(containerWidth - 40, 800),
-                    height: Math.min((containerWidth - 40) * 0.6, 480)
-                };
-            } else {
-                return {
-                    width: 960,
-                    height: 500
-                };
-            }
-        }
+			const container = document.getElementById('map-container');
+			const containerWidth = container.offsetWidth;
+			const isMobile = window.innerWidth <= 768;
+    
+			if (isMobile) {
+				return {
+					width: Math.min(containerWidth - 40, 800),
+					height: Math.min((containerWidth - 40) * 0.6, 480)
+				};
+			} else {
+				return {
+					width: 960,
+					height: 500
+				};
+			}
+		}
         
         function createMap() {
             const dimensions = getMapDimensions();
@@ -695,6 +863,9 @@
             const svg = d3.select("#map")
                 .attr("width", width)
                 .attr("height", height);
+            
+            const tooltip = d3.select(".tooltip");
+            const stateOdds = dataSources[currentSource].stateOdds;
             
             // Load US map data
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
@@ -722,7 +893,7 @@
                     })
                     .on("mouseover", function(event, d) {
                         const stateName = d.properties.name;
-                        const odds = stateOdds[stateName];
+                        const odds = dataSources[currentSource].stateOdds[stateName];
                         
                         // Highlight corresponding bar segment
                         document.querySelectorAll('.state-segment').forEach(segment => {
@@ -759,7 +930,12 @@
             });
         }
         
-        // Create map on load
+        // Initialize with Jack's forecast
+        updateChart('jack');
+        updateStateBar('jack');
+		// ADD THESE TWO LINES HERE - Position majority line initially
+		const majorityLine = document.getElementById('majorityLine');
+		majorityLine.style.left = '50%';
         createMap();
         
         // Recreate map on window resize
