@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jack's Political Typology</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #34495e;
+            margin-top: 30px;
+        }
+        .question {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+            cursor: pointer;
+        }
+        input[type="radio"], input[type="checkbox"] {
+            margin-right: 8px;
+        }
+        input[type="number"] {
+            width: 150px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        #results {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f4f8;
+            border-radius: 4px;
+            display: none;
+        }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0;
+        }
+        .comparison-table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        .comparison-table th,
+        .comparison-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .comparison-table th {
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+        }
+        .comparison-table tr:hover {
+            background-color: #f5f5f5;
+        }
+        .user-row {
+            background-color: #d4edda;
+            font-weight: bold;
+        }
+        .user-row:hover {
+            background-color: #c3e6cb;
+        }
+        .error {
+            color: #e74c3c;
+            margin-top: 10px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            color: #3498db;
+            font-size: 0.8em;
+            vertical-align: super;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 400px;
+            background-color: #2c3e50;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 12px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -200px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        .tooltip .tooltiptext::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #2c3e50 transparent transparent transparent;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        #q10Container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Jack's Political Typology</h1>
+    
+    <p>
+        I primarily think about politics in terms of values and epistemics. Some people more strongly value
+		those who are similar to them in some sense, whether of the same nationality, gender, or even race.
+		Even if the facts are agreed upon, they might still disagree on policy for this reason. As for epistemics,
+		there are differences in who people are willing to trust for information and how much time people
+		spend thinking about the world, which can drive differences in opinion when it comes to questions
+		like "Does the COVID-19 vaccine work?" or "Do the Democrats want to give healthcare to undocumented
+		immigrants?" This quiz is meant to identify your position on these two dimensions in short order.
+    </p>
+        
+        <h2>Nationalism</h2>
+        
+        <div class="question">
+    <strong>Q1:</strong> Suppose you can give $1,000 to a random American. What amount of money do I need to offer to be distributed to a random foreigner for you to choose the foreigner instead? Assume they'll be just as well-off as the typical American, and that a proportionate amount of productive capacity is created in the world (for this thought experiment, by magic) when the money is distributed.
+    <span class="tooltip">
+        <span style="font-size: 0.8em;">Note</span>
+        <span class="tooltiptext">If you're confused, think of this question as a way to identify how much more you value the happiness of other Americans over that of people in other countries, if at all, then re-read it. A proportionate amount of productive capacity is created so that you don't think of this as redistribution, and so that even someone who doesn't value foreigners at all would have a reason to input a number.</span>
+    </span>
+    <br><br>
+    <label>
+        Amount in dollars: $<input type="text" id="q1" min="0" step="1">
+    </label>
+</div>
+
+        <div class="question">
+            <strong>Q2:</strong> You can give $1,000 to a random American. What amount do I need to offer to be given to a random resident of a poor country (such as Somalia or India) for you to choose them instead? Like before, a proportionate amount of productive capacity is created.
+            <br><br>
+            <label>
+                Amount in dollars: $<input type="text" id="q2" min="0" step="1">
+            </label>
+        </div>
+
+        <h2>Domestic Distribution</h2>
+
+        <div class="question">
+            <strong>Q3:</strong> Which do you agree with most? Assume the "extra money" is an unconditional cash grant.
+            <br><br>
+            <label><input type="radio" name="q3" value="1"> 1. Extra money benefits the poor a lot and is meaningless to the typical person. It's especially meaningless to the wealthy.</label>
+            <label><input type="radio" name="q3" value="2"> 2. Extra money helps the poor a lot, is good for the typical person, and means little to the wealthy.</label>
+            <label><input type="radio" name="q3" value="3"> 3. Extra money is just as beneficial regardless of how much you make.</label>
+            <label><input type="radio" name="q3" value="4"> 4. Extra money hurts the poor and helps most other people.</label>
+        </div>
+
+        <div class="question">
+            <strong>Q4:</strong> Which race would you most prefer to grant $1,000 to a random member of? Assume real-world differences in income and status between groups hold.
+            <br><br>
+            <select id="q4">
+                <option value="">Select...</option>
+                <option value="white">White</option>
+                <option value="black">Black</option>
+                <option value="hispanic">Hispanic</option>
+                <option value="asian">Asian</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <strong>Your own race:</strong>
+            <br><br>
+            <select id="own_race">
+                <option value="">Select...</option>
+                <option value="white">White</option>
+                <option value="black">Black</option>
+                <option value="hispanic">Hispanic</option>
+                <option value="asian">Asian</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
+
+        <div class="question">
+            <strong>Q5:</strong> Assuming now that there are no differences in average income, to which race should the grant go to, or are you ambivalent?
+            <br><br>
+            <label><input type="radio" name="q5" value="ambivalent"> Ambivalent</label>
+            <label><input type="radio" name="q5" value="preference"> I have a preference</label>
+        </div>
+
+        <div class="question">
+            <strong>Q6:</strong> Now if you are instead providing a $100,000 loan for a business, do you have a preference for any particular race? Assume potential recipients look like the whole population (not just entrepreneurs who might be especially smart in real life).
+            <br><br>
+            <label><input type="radio" name="q6" value="yes"> Yes</label>
+            <label><input type="radio" name="q6" value="no"> No</label>
+        </div>
+
+        <div class="question">
+            <strong>Q7:</strong> Another $100k loan, but this time, assume no differences in average intelligence or competency of any kind. Do you have a preference?
+            <br><br>
+            <label><input type="radio" name="q7" value="yes"> Yes</label>
+            <label><input type="radio" name="q7" value="no"> No</label>
+        </div>
+
+        <h2>Knowledge and Trust</h2>
+
+        <div class="question">
+            <strong>Q8:</strong> Which do you think best describes you?
+            <br><br>
+            <label><input type="radio" name="q8" value="1"> 1. I know next to nothing relevant to politics; I can't even name a political issue in the US.</label>
+            <label><input type="radio" name="q8" value="2"> 2. I'm pretty average.</label>
+            <label><input type="radio" name="q8" value="3"> 3. I have an interest in politics and spend more time reading about it than most, but not professionally.</label>
+            <label><input type="radio" name="q8" value="4"> 4. I am a hobbyist researcher who has created documents or other writing summarizing available evidence on questions of public importance.</label>
+            <label><input type="radio" name="q8" value="5"> 5. I am a professional researcher, but I don't spend much time producing literature reviews or similar documents.</label>
+            <label><input type="radio" name="q8" value="6"> 6. I am a professional researcher who spends substantial amounts of time summarizing evidence relevant to questions of public importance.</label>
+        </div>
+
+        <div class="question" id="q10Container">
+            <strong>Q8.5:</strong> Since you selected option 2 or 3 for Q8, do the sources you depend on for information generally respect the consensus when it exists among experts, or are they more "heterodox"?<span class="tooltip">Note
+                <span class="tooltiptext">If you are not sure, think about whether they talk frequently about how the experts are wrong. Consensus sources include people like Paul Krugman and i/o, while heterodox sources include Oren Cass and Eric Weinstein. The consensus is usually respected in traditional media sources like the New York Times or Fox News. It is not respected in places like the Joe Rogan Podcast.</span>
+            </span>
+            <br><br>
+            <label><input type="radio" name="q10" value="consensus"> Consensus</label>
+            <label><input type="radio" name="q10" value="heterodox"> Heterodox</label>
+        </div>
+
+        <div class="question">
+            <strong>Q9:</strong> Some question of fact has become a public debate. All of these people disagree with each other over it substantially: Steve Sailer, Ezra Klein, Donald Trump, and Zohran Mamdani. Who do you think you are most likely to agree with?
+            <br><br>
+            <label><input type="radio" name="q9" value="io"> Steve Sailer</label>
+            <label><input type="radio" name="q9" value="klein"> Ezra Klein</label>
+            <label><input type="radio" name="q9" value="trump"> Donald Trump</label>
+            <label><input type="radio" name="q9" value="mamdani"> Zohran Mamdani</label>
+        </div>
+
+        <button onclick="calculateScores()">Calculate My Scores</button>
+
+        <div id="results"></div>
+        <div id="error" class="error"></div>
+    </div>
+
+    <script>
+        // Reference scores for public figures
+        const referenceScores = [
+            { name: "Steve Sailer", fairness: -3700, rationalism: 4100 },
+            { name: "Ezra Klein", fairness: -1800, rationalism: 10000 },
+            { name: "Donald Trump", fairness: -15200, rationalism: 2100 },
+            { name: "Zohran Mamdani", fairness: -1600, rationalism: 0 }
+        ];
+
+        // Show/hide Q10 based on Q8 selection
+        document.querySelectorAll('input[name="q8"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const q10Container = document.getElementById('q10Container');
+                const q10Radios = document.querySelectorAll('input[name="q10"]');
+                
+                if (this.value === '2' || this.value === '3') {
+                    q10Container.style.display = 'block';
+                } else {
+                    q10Container.style.display = 'none';
+                    q10Radios.forEach(r => r.checked = false);
+                }
+            });
+        });
+
+        function calculateScores() {
+            const error = document.getElementById('error');
+            const results = document.getElementById('results');
+            error.textContent = '';
+            results.style.display = 'none';
+
+            // Get values
+            const q1 = parseFloat(document.getElementById('q1').value.replace(/,/g, ''));
+            const q2 = parseFloat(document.getElementById('q2').value.replace(/,/g, ''));
+            const q3 = document.querySelector('input[name="q3"]:checked');
+            const q4 = document.getElementById('q4').value;
+            const ownRace = document.getElementById('own_race').value;
+            const q5 = document.querySelector('input[name="q5"]:checked');
+            const q6 = document.querySelector('input[name="q6"]:checked');
+            const q7 = document.querySelector('input[name="q7"]:checked');
+            const q8 = document.querySelector('input[name="q8"]:checked');
+            const q9 = document.querySelector('input[name="q9"]:checked');
+            const q10 = document.querySelector('input[name="q10"]:checked');
+
+            // Validate
+            if (isNaN(q1) || isNaN(q2)) {
+                error.textContent = 'Please answer Q1 and Q2 with dollar amounts.';
+                return;
+            }
+            if (!q3 || !q4 || !ownRace || !q5 || !q6 || !q7 || !q8 || !q9) {
+                error.textContent = 'Please answer all questions.';
+                return;
+            }
+
+            const q8Value = parseInt(q8.value);
+            
+            // Check if Q10 should be answered
+            if ((q8Value === 2 || q8Value === 3) && !q10) {
+                error.textContent = 'Please answer Q10.';
+                return;
+            }
+
+            // Calculate Fairness/Kinship score
+            const totalForeign = q1 + q2;
+            const q3Value = parseInt(q3.value);
+            const q4Different = (q4 !== ownRace) ? 1 : 0;
+            const q5Ambivalent = (q5.value === 'ambivalent') ? 1 : 0;
+            const q7Preference = (q7.value === 'yes') ? 1 : 0;
+            const q9KleinMamdani = (q9.value === 'klein' || q9.value === 'mamdani') ? 1 : 0;
+
+            const fairnessScore = -1 * totalForeign - 100 * q3Value + 100 * q4Different + 
+                                  100 * q5Ambivalent + 100 * q7Preference + 100 * q9KleinMamdani;
+
+            // Calculate Rationalism/Populism score
+            const q6Preference = (q6.value === 'yes') ? 1 : 0;
+            const q9IoKlein = (q9.value === 'io' || q9.value === 'klein') ? 1 : 0;
+            
+            let effectiveQ8Value = q8Value;
+            let q10Penalty = 0;
+            
+            // Apply Q10 logic if answered
+            if (q8Value === 2 || q8Value === 3) {
+                if (q10.value === 'consensus') {
+                    effectiveQ8Value = 4;
+                } else if (q10.value === 'heterodox') {
+                    effectiveQ8Value = 1;
+                    q10Penalty = 1000;
+                }
+            }
+
+            const rationalismScore = 100 * q6Preference + 1000 * effectiveQ8Value + 4000 * q9IoKlein - q10Penalty;
+
+            // Create comparison data
+            const comparisonData = [
+                { name: "You", fairness: fairnessScore, rationalism: rationalismScore, isUser: true },
+                ...referenceScores
+            ];
+
+            // Sort by fairness score (descending)
+            comparisonData.sort((a, b) => b.fairness - a.fairness);
+
+            // Generate comparison table
+            let tableHTML = `
+                <h3>Fairness/Kinship Comparison</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Person</th>
+                            <th>Fairness/Kinship Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            comparisonData.forEach(person => {
+                const rowClass = person.isUser ? 'user-row' : '';
+                tableHTML += `
+                    <tr class="${rowClass}">
+                        <td>${person.name}</td>
+                        <td>${person.fairness}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            // Sort by rationalism score (descending)
+            comparisonData.sort((a, b) => b.rationalism - a.rationalism);
+
+            tableHTML += `
+                <p style="margin-top: 15px; font-style: italic; color: #555;">Please note that these are synthetic scores guessed by an LLM and were not found by quizzing these people.</p>
+                
+                <h3>Rationalism/Populism Comparison</h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Person</th>
+                            <th>Rationalism/Populism Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            comparisonData.forEach(person => {
+                const rowClass = person.isUser ? 'user-row' : '';
+                tableHTML += `
+                    <tr class="${rowClass}">
+                        <td>${person.name}</td>
+                        <td>${person.rationalism}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            // Display results
+            results.innerHTML = `
+                <h2>Your Results</h2>
+                <div class="score">Fairness/Kinship Score: ${fairnessScore}</div>
+                <p>${fairnessScore > 0 ? 'Higher scores indicate more emphasis on fairness and less preference for those close to you (nationality/race).' : 'Lower scores indicate more emphasis on kinship and preference for those close to you (nationality/race).'}</p>
+                
+                <div class="score">Rationalism/Populism Score: ${rationalismScore}</div>
+                <p>${rationalismScore > 3000 ? 'Higher scores indicate more rationalist tendencies.' : 'Lower scores indicate more populist tendencies.'}</p>
+                
+                ${tableHTML}
+            `;
+            results.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
