@@ -215,6 +215,7 @@
                 <option value="hispanic">Hispanic</option>
                 <option value="asian">Asian</option>
                 <option value="other">Other</option>
+				<option value="ambivalent">Ambivalent</option>
             </select>
         </div>
 
@@ -353,7 +354,7 @@
             // Calculate Fairness/Kinship score
             const totalForeign = q1 + q2;
             const q3Value = parseInt(q3.value);
-            const q4Different = (q4 !== ownRace) ? 1 : 0;
+            const q4Different = (q4 !== ownRace || q4 === 'ambivalent') ? 1 : 0;
             const q5Ambivalent = (q5.value === 'ambivalent') ? 1 : 0;
             const q7Preference = (q7.value === 'yes') ? 1 : 0;
             const q9KleinMamdani = (q9.value === 'klein' || q9.value === 'mamdani') ? 1 : 0;
