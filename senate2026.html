@@ -133,6 +133,30 @@
             height: 400px;
             margin: 40px 0 20px 0;
         }
+
+        /* Chart annotation legend */
+        .chart-annotation-note {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px 0 0 0;
+            font-size: 12px;
+            font-style: italic;
+            color: #888;
+        }
+
+        .chart-annotation-note input[type="checkbox"] {
+            accent-color: #999;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .chart-annotation-note label {
+            cursor: pointer;
+            user-select: none;
+        }
         
         /* Data source toggle buttons */
         .data-source-toggle {
@@ -444,6 +468,12 @@
         <div class="chart-container">
             <canvas id="oddsChart"></canvas>
         </div>
+
+        <!-- Annotation note: only shown for Jack's forecast -->
+        <div class="chart-annotation-note" id="annotationNote">
+            <input type="checkbox" id="showAnnotations" checked>
+            <label for="showAnnotations">Model updates marked with grey dotted lines.</label>
+        </div>
         
         <div class="data-source-toggle">
             <button class="source-button active" id="jackForecast">Jack's forecast</button>
@@ -460,10 +490,10 @@
                     <div class="majority-label">50 seats needed for Republican majority (VP acts as tiebreaker)</div>
                 </div>
                 <div class="seats-label left">
-                    <span style="color: #2563eb;">▪ </span> 34 seats not up for election
+                    <span style="color: #2563eb;">&#9642; </span> 34 seats not up for election
                 </div>
                 <div class="seats-label right">
-                    <span style="color: #dc2626;">▪ </span> 31 seats not up for election
+                    <span style="color: #dc2626;">&#9642; </span> 31 seats not up for election
                 </div>
             </div>
             
@@ -595,17 +625,54 @@
         
         let currentSource = 'jack';
         let chart = null;
+        let showAnnotations = true;
+
+        // Custom Chart.js plugin to draw dotted vertical annotation lines
+        const updateLinesPlugin = {
+            id: 'updateLines',
+            afterDraw(chartInstance, args, options) {
+                if (!options.lines || !options.lines.length || !options.visible) return;
+
+                const { ctx, scales } = chartInstance;
+                const xScale = scales.x;
+                const yScale = scales.y;
+
+                options.lines.forEach(labelIndex => {
+                    const x = xScale.getPixelForValue(labelIndex);
+                    const yTop = yScale.getPixelForValue(yScale.max);
+                    const yBottom = yScale.getPixelForValue(yScale.min);
+
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    ctx.strokeStyle = 'rgba(150, 150, 150, 0.6)';
+                    ctx.lineWidth = 1.5;
+                    ctx.moveTo(x, yTop);
+                    ctx.lineTo(x, yBottom);
+                    ctx.stroke();
+                    ctx.restore();
+                });
+            }
+        };
+
+        Chart.register(updateLinesPlugin);
         
         // Initialize chart
         const ctx = document.getElementById('oddsChart').getContext('2d');
         
         function updateChart(source) {
             const data = dataSources[source];
-            
+            const isJack = source === 'jack';
+
+            // Index 2 = 'March 10' (third label); only shown for Jack's forecast
+            const annotationLines = isJack ? [2] : [];
+
             if (chart) {
                 chart.data.labels = data.dates;
                 chart.data.datasets[0].data = data.republicanOdds;
                 chart.data.datasets[1].data = data.democraticOdds;
+                chart.options.plugins.updateLines.lines = annotationLines;
+                chart.options.plugins.updateLines.visible = isJack && showAnnotations;
                 chart.update();
             } else {
                 chart = new Chart(ctx, {
@@ -663,6 +730,10 @@
                                         return context.dataset.label + ': ' + context.parsed.y + '%';
                                     }
                                 }
+                            },
+                            updateLines: {
+                                lines: annotationLines,
+                                visible: isJack && showAnnotations
                             }
                         },
                         scales: {
@@ -713,29 +784,24 @@
             const stateBar = document.getElementById('stateBar');
             const tooltip = d3.select(".tooltip");
             
-            // Clear existing bar
             stateBar.innerHTML = '';
             
-            // Sort states by party likelihood
             const stateArray = Object.entries(stateOdds).map(([state, odds]) => ({
                 name: state,
                 ...odds
             })).sort((a, b) => b.dem - a.dem);
             
-            const totalStates = stateArray.length;
             const notUpForElectionLeft = 34;
             const notUpForElectionRight = 31;
             const totalSeats = 100;
             
-            // Add dotted sections for seats not up for election
             const leftSection = document.createElement('div');
             leftSection.style.width = (notUpForElectionLeft / totalSeats * 100) + '%';
             leftSection.style.background = 'repeating-linear-gradient(45deg, #60a5fa, #60a5fa 10px, #93c5fd 10px, #93c5fd 20px)';
             leftSection.style.opacity = '0.3';
             stateBar.appendChild(leftSection);
             
-            // Create segments for each state
-            stateArray.forEach((state, index) => {
+            stateArray.forEach((state) => {
                 const segment = document.createElement('div');
                 segment.className = 'state-segment';
                 segment.style.width = (1 / totalSeats * 100) + '%';
@@ -765,21 +831,18 @@
                 stateBar.appendChild(segment);
             });
             
-            // Add right dotted section
             const rightSection = document.createElement('div');
             rightSection.style.width = (notUpForElectionRight / totalSeats * 100) + '%';
             rightSection.style.background = 'repeating-linear-gradient(45deg, #f87171, #f87171 10px, #fca5a5 10px, #fca5a5 20px)';
             rightSection.style.opacity = '0.3';
             stateBar.appendChild(rightSection);
-			
-			// ADD THIS LINE HERE - Position majority line at 50%
-			const majorityLine = document.getElementById('majorityLine');
-			majorityLine.style.left = '50%';
+
+            const majorityLine = document.getElementById('majorityLine');
+            majorityLine.style.left = '50%';
         }
         
         function updateMap(source) {
             const stateOdds = dataSources[source].stateOdds;
-            const tooltip = d3.select(".tooltip");
             
             d3.selectAll('.state')
                 .transition()
@@ -793,27 +856,35 @@
                     return '#ccc';
                 });
         }
+
+        function updateAnnotationNoteVisibility(source) {
+            const note = document.getElementById('annotationNote');
+            note.style.display = source === 'jack' ? 'flex' : 'none';
+        }
         
         function updateDisplay(source) {
             const data = dataSources[source];
             
-            // Update author
             document.getElementById('forecastAuthor').textContent = data.author;
             document.getElementById('forecastAuthorMobile').textContent = data.author;
             
-            // Update current odds
             document.getElementById('currentOddsDesktop').textContent = data.currentOdds + '%';
             document.getElementById('currentOddsMobile').textContent = data.currentOdds + '%';
             
-            // Update chart
+            updateAnnotationNoteVisibility(source);
             updateChart(source);
-            
-            // Update state bar
             updateStateBar(source);
-            
-            // Update map
             updateMap(source);
         }
+
+        // Checkbox toggle for annotation lines
+        document.getElementById('showAnnotations').addEventListener('change', function() {
+            showAnnotations = this.checked;
+            if (chart) {
+                chart.options.plugins.updateLines.visible = showAnnotations;
+                chart.update();
+            }
+        });
         
         // Button event listeners
         document.getElementById('jackForecast').addEventListener('click', function() {
@@ -836,28 +907,27 @@
         
         // Map setup with responsive dimensions
         function getMapDimensions() {
-			const container = document.getElementById('map-container');
-			const containerWidth = container.offsetWidth;
-			const isMobile = window.innerWidth <= 768;
+            const container = document.getElementById('map-container');
+            const containerWidth = container.offsetWidth;
+            const isMobile = window.innerWidth <= 768;
     
-			if (isMobile) {
-				return {
-					width: Math.min(containerWidth - 40, 800),
-					height: Math.min((containerWidth - 40) * 0.6, 480)
-				};
-			} else {
-				return {
-					width: 960,
-					height: 500
-				};
-			}
-		}
+            if (isMobile) {
+                return {
+                    width: Math.min(containerWidth - 40, 800),
+                    height: Math.min((containerWidth - 40) * 0.6, 480)
+                };
+            } else {
+                return {
+                    width: 960,
+                    height: 500
+                };
+            }
+        }
         
         function createMap() {
             const dimensions = getMapDimensions();
             const { width, height } = dimensions;
             
-            // Clear existing map
             d3.select("#map").selectAll("*").remove();
             
             const svg = d3.select("#map")
@@ -867,9 +937,7 @@
             const tooltip = d3.select(".tooltip");
             const stateOdds = dataSources[currentSource].stateOdds;
             
-            // Load US map data
             d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
-                const states = topojson.feature(us, us.objects.states);
                 const statePaths = topojson.feature(us, us.objects.states);
                 
                 const projection = d3.geoAlbersUsa()
@@ -895,7 +963,6 @@
                         const stateName = d.properties.name;
                         const odds = dataSources[currentSource].stateOdds[stateName];
                         
-                        // Highlight corresponding bar segment
                         document.querySelectorAll('.state-segment').forEach(segment => {
                             if (segment.dataset.stateName === stateName) {
                                 segment.classList.add('highlight');
@@ -930,15 +997,13 @@
             });
         }
         
-        // Initialize with Jack's forecast
+        // Initialize
         updateChart('jack');
         updateStateBar('jack');
-		// ADD THESE TWO LINES HERE - Position majority line initially
-		const majorityLine = document.getElementById('majorityLine');
-		majorityLine.style.left = '50%';
+        const majorityLine = document.getElementById('majorityLine');
+        majorityLine.style.left = '50%';
         createMap();
         
-        // Recreate map on window resize
         window.addEventListener('resize', function() {
             clearTimeout(window.resizeTimeout);
             window.resizeTimeout = setTimeout(createMap, 250);
