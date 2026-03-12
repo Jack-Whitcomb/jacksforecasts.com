@@ -165,6 +165,7 @@ def update_html(dates, rep_odds, dem_odds, state_odds):
     state_odds_str = ',\n'.join(state_lines)
 
     new_betting_block = (
+        f"            // BEGIN_BETTING_DATA\n"
         f"            betting: {{\n"
         f"                name: \"Betting odds\",\n"
         f"                author: \"odds from electionbettingodds.com\",\n"
@@ -175,18 +176,20 @@ def update_html(dates, rep_odds, dem_odds, state_odds):
         f"                stateOdds: {{\n"
         f"{state_odds_str}\n"
         f"                }}\n"
-        f"            }}"
+        f"            }}\n"
+        f"            // END_BETTING_DATA"
     )
 
-    # Replace the existing betting block
-    pattern = r'betting:\s*\{.*?(?=\n\s*\};?\s*\n\s*\};)'
-    match = re.search(pattern, html, re.DOTALL)
-    if not match:
-        print("ERROR: Could not find the 'betting' data block in senate2026.html.")
-        print("The script expects a block starting with 'betting: {' inside 'const dataSources'.")
+    # Replace between marker comments
+    start_marker = '// BEGIN_BETTING_DATA'
+    end_marker = '// END_BETTING_DATA'
+    start_idx = html.find(start_marker)
+    end_idx = html.find(end_marker)
+    if start_idx == -1 or end_idx == -1:
+        print("ERROR: Could not find BEGIN_BETTING_DATA / END_BETTING_DATA markers in senate2026.html.")
         sys.exit(1)
 
-    new_html = html[:match.start()] + new_betting_block + html[match.end():]
+    new_html = html[:start_idx] + new_betting_block + html[end_idx + len(end_marker):]
 
     # Also update the "last updated" date in the desktop header
     new_html = re.sub(
