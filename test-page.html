@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ines DeTraglia | Marketing Professional</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --accent: #b08d6a;
+      --dark: #1a1a2e;
+      --mid: #2e2e4a;
+      --light-bg: #f7f4f0;
+      --text: #333;
+      --muted: #777;
+    }
+
+    body {
+      font-family: 'Georgia', serif;
+      color: var(--text);
+      background: var(--light-bg);
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      background: var(--dark);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 3rem;
+      z-index: 100;
+    }
+    nav .logo {
+      color: white;
+      font-size: 1.1rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 2rem;
+    }
+    nav a {
+      color: #ccc;
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--accent); }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--dark) 0%, var(--mid) 60%, #3a2e5a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+    }
+    .hero-inner h1 {
+      font-size: clamp(2.5rem, 6vw, 5rem);
+      color: white;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+    .hero-inner .tagline {
+      color: var(--accent);
+      font-family: 'Arial', sans-serif;
+      font-size: clamp(0.9rem, 2vw, 1.15rem);
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      margin-bottom: 1.5rem;
+    }
+    .hero-inner p {
+      color: #bbb;
+      font-size: 1.05rem;
+      max-width: 620px;
+      line-height: 1.8;
+      margin: 0 auto 2.5rem;
+    }
+    .hero-links {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      border-radius: 2px;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: #9a7858; }
+    .btn-outline {
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      background: transparent;
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* SECTIONS */
+    section { padding: 5rem 2rem; }
+    .container { max-width: 900px; margin: 0 auto; }
+    .section-label {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: 2rem;
+      color: var(--dark);
+      margin-bottom: 2.5rem;
+    }
+
+    /* ABOUT */
+    #about { background: white; }
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+    .about-text p {
+      line-height: 1.85;
+      color: #555;
+      margin-bottom: 1rem;
+    }
+    .about-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+    }
+    .meta-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .meta-icon {
+      width: 36px;
+      height: 36px;
+      background: var(--light-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+    .meta-item strong { display: block; font-size: 0.85rem; color: var(--dark); }
+    .meta-item span { font-size: 0.85rem; color: var(--muted); }
+
+    /* SKILLS */
+    #skills { background: var(--light-bg); }
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 1rem;
+    }
+    .skill-chip {
+      background: white;
+      border: 1px solid #e0d8d0;
+      border-radius: 2px;
+      padding: 0.6rem 1rem;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: var(--dark);
+      text-align: center;
+    }
+
+    /* EXPERIENCE */
+    #experience { background: white; }
+    .exp-item { margin-bottom: 3rem; padding-bottom: 3rem; border-bottom: 1px solid #eee; }
+    .exp-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .exp-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 0.25rem;
+    }
+    .exp-header h3 { font-size: 1.15rem; color: var(--dark); }
+    .exp-header .date {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .exp-company {
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      color: var(--accent);
+      font-weight: bold;
+      margin-bottom: 0.35rem;
+    }
+    .exp-company-desc {
+      font-size: 0.85rem;
+      color: var(--muted);
+      font-style: italic;
+      margin-bottom: 1rem;
+    }
+    .exp-item ul { padding-left: 1.2rem; }
+    .exp-item li {
+      font-size: 0.95rem;
+      color: #555;
+      line-height: 1.7;
+      margin-bottom: 0.4rem;
+    }
+
+    /* EDUCATION */
+    #education { background: var(--light-bg); }
+    .edu-card {
+      background: white;
+      border: 1px solid #e0d8d0;
+      padding: 2rem;
+      border-radius: 2px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .edu-card h3 { font-size: 1.1rem; color: var(--dark); margin-bottom: 0.25rem; }
+    .edu-card p { font-size: 0.9rem; color: var(--muted); }
+    .edu-card .degree {
+      color: var(--accent);
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+    }
+
+    /* TOOLS */
+    #tools { background: white; }
+    .tools-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .tool-tag {
+      background: var(--dark);
+      color: #ccc;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.78rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      letter-spacing: 0.05em;
+    }
+
+    /* CONTACT */
+    #contact {
+      background: var(--dark);
+      text-align: center;
+    }
+    #contact .section-label { color: var(--accent); }
+    #contact h2 { color: white; }
+    #contact p { color: #aaa; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.7; }
+    .contact-links {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .contact-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #ccc;
+      text-decoration: none;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.85rem;
+      transition: color 0.2s;
+    }
+    .contact-link:hover { color: var(--accent); }
+
+    /* FOOTER */
+    footer {
+      background: #111;
+      text-align: center;
+      padding: 1.25rem;
+      font-family: 'Arial', sans-serif;
+      font-size: 0.75rem;
+      color: #555;
+    }
+
+    @media (max-width: 650px) {
+      .about-grid { grid-template-columns: 1fr; }
+      nav ul { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">Ines DeTraglia</div>
+    <ul>
+      <li><a href="#about">About</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#education">Education</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <section id="hero">
+    <div class="hero-inner">
+      <p class="tagline">Marketing Professional</p>
+      <h1>Ines DeTraglia</h1>
+      <p>A passionate, innovative marketer with a strong foundation in digital strategy, social media, and event marketing — fluent in English, Spanish, and Italian.</p>
+      <div class="hero-links">
+        <a href="#experience" class="btn btn-primary">View My Work</a>
+        <a href="#contact" class="btn btn-outline">Get In Touch</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="container">
+      <p class="section-label">About Me</p>
+      <h2>Marketer. Storyteller. Community Builder.</h2>
+      <div class="about-grid">
+        <div class="about-text">
+          <p>I'm a marketing graduate from Penn State University with hands-on experience spanning social media, content creation, email marketing, and community events. I thrive at the intersection of creativity and strategy — turning data-driven insights into campaigns that actually move the needle.</p>
+          <p>Most recently, I drove a 43% follower increase and 35% engagement lift at Hankin Group by building campaigns that connected real people to their community. I love building brands that feel human.</p>
+        </div>
+        <div class="about-meta">
+          <div class="meta-item">
+            <div class="meta-icon">📍</div>
+            <div>
+              <strong>Location</strong>
+              <span>Wayne, PA</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-icon">🎓</div>
+            <div>
+              <strong>Education</strong>
+              <span>B.S. Marketing, Penn State University</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-icon">🌍</div>
+            <div>
+              <strong>Languages</strong>
+              <span>English &amp; Spanish (native) · Italian (business proficient)</span>
+            </div>
+          </div>
+          <div class="meta-item">
+            <div class="meta-icon">💼</div>
+            <div>
+              <strong>LinkedIn</strong>
+              <span><a href="https://www.linkedin.com/in/inesdetraglia" target="_blank" style="color: var(--accent);">linkedin.com/in/inesdetraglia</a></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="container">
+      <p class="section-label">What I Do</p>
+      <h2>Core Competencies</h2>
+      <div class="skills-grid">
+        <div class="skill-chip">Social Media Marketing</div>
+        <div class="skill-chip">Events Marketing</div>
+        <div class="skill-chip">Content Creation &amp; Design</div>
+        <div class="skill-chip">Digital Marketing</div>
+        <div class="skill-chip">Email Marketing</div>
+        <div class="skill-chip">Community Engagement</div>
+        <div class="skill-chip">Social Media Strategy</div>
+        <div class="skill-chip">Consumer Behavior</div>
+        <div class="skill-chip">Sports Marketing</div>
+        <div class="skill-chip">Marketing Strategy</div>
+        <div class="skill-chip">Event Planning</div>
+        <div class="skill-chip">Campaign Analytics</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="container">
+      <p class="section-label">Career</p>
+      <h2>Experience</h2>
+
+      <div class="exp-item">
+        <div class="exp-header">
+          <h3>Marketing Intern</h3>
+          <span class="date">Jan 2025 – Aug 2025</span>
+        </div>
+        <div class="exp-company">Hankin Group &mdash; Exton, PA</div>
+        <div class="exp-company-desc">Vertically integrated real estate development, management, and construction company with over 2.5MM SF of commercial properties and 2,500 residential units under management.</div>
+        <ul>
+          <li>Increased following by <strong>43%</strong> on social media platforms by creating content to promote local businesses and community events through various campaigns.</li>
+          <li>Drove <strong>35% more engagement</strong> on social platforms by developing creative promotions including giveaways and collaborations.</li>
+          <li>Developed impactful collateral and advertisements driven by target demographic research.</li>
+          <li>Supported over <strong>20 community events</strong> by managing promotional efforts, on-site logistics, and increasing newsletter sign-ups.</li>
+          <li>Coordinated with third-party businesses to create social content driving awareness, engagement, and following to both accounts.</li>
+        </ul>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-header">
+          <h3>Marketing Intern</h3>
+          <span class="date">Jun 2023 – Dec 2023</span>
+        </div>
+        <div class="exp-company">TGaS Advisors, a division of Trinity Life Sciences &mdash; East Norriton, PA</div>
+        <div class="exp-company-desc">Leading provider of benchmarking and advisory services in the life sciences industry, offering clear insights, strategic advice, and valuable connections across commercial and medical affairs.</div>
+        <ul>
+          <li>Administered and created innovative posts across company social media accounts (Instagram, LinkedIn, Facebook).</li>
+          <li>Supported key email marketing campaigns and assisted in managing and organizing webinars.</li>
+          <li>Conducted thorough research to create a social media competitor report — tracking all LinkedIn posts during Q4, leading to a strategic shift that increased engagement.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="education">
+    <div class="container">
+      <p class="section-label">Academic Background</p>
+      <h2>Education</h2>
+      <div class="edu-card">
+        <div>
+          <h3>The Pennsylvania State University</h3>
+          <p class="degree">Bachelor of Science in Marketing &nbsp;·&nbsp; Minor in Italian</p>
+          <p>State College, PA</p>
+        </div>
+        <div style="text-align:right;">
+          <p style="color: var(--accent); font-family: Arial; font-size: 0.85rem; font-weight: bold;">May 2024</p>
+          <p style="font-size:0.8rem; color: var(--muted);">Penn State Women in Business</p>
+          <p style="font-size:0.8rem; color: var(--muted);">Sigma Kappa · New Member Education Committee</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tools">
+    <div class="container">
+      <p class="section-label">Technical Skills</p>
+      <h2>Tools &amp; Platforms</h2>
+      <div class="tools-grid">
+        <span class="tool-tag">Adobe Creative Suite</span>
+        <span class="tool-tag">Canva</span>
+        <span class="tool-tag">CapCut</span>
+        <span class="tool-tag">Meta Business Suite</span>
+        <span class="tool-tag">Hootsuite</span>
+        <span class="tool-tag">Mailchimp</span>
+        <span class="tool-tag">Pardot</span>
+        <span class="tool-tag">Salesforce</span>
+        <span class="tool-tag">Salesloft</span>
+        <span class="tool-tag">ClickUp</span>
+        <span class="tool-tag">Microsoft Office</span>
+        <span class="tool-tag">DSLR Photography</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="container">
+      <p class="section-label">Let's Connect</p>
+      <h2>Get In Touch</h2>
+      <p>Whether you're looking for a creative marketing collaborator or want to talk strategy, I'd love to hear from you.</p>
+      <div class="contact-links">
+        <a href="mailto:idetraglia02@gmail.com" class="contact-link">✉ idetraglia02@gmail.com</a>
+        <a href="tel:6304531701" class="contact-link">📞 (630) 453-1701</a>
+        <a href="https://www.linkedin.com/in/inesdetraglia" target="_blank" class="contact-link">🔗 LinkedIn</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    &copy; 2026 Ines DeTraglia &nbsp;·&nbsp; Wayne, PA
+  </footer>
+
+</body>
+</html>
