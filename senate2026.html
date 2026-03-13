@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>U.S. Senate Odds</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <style>
@@ -444,11 +445,11 @@
             <div class="title-section">
                 <h1>2026 US Senate Forecast</h1>
                 <h2 id="forecastAuthor">by Jack Whitcomb</h2>
-                <div class="election-date">Election date: November 3, 2026 (last updated 3/11/2026)</div>
+                <div class="election-date">Election date: November 3, 2026 (last updated 3/13/2026)</div>
             </div>
             <div class="current-odds">
                 <div class="current-odds-label">Odds that Republicans retain control:</div>
-                <div class="current-odds-value" id="currentOddsDesktop">72.5%</div>
+                <div class="current-odds-value" id="currentOddsDesktop">51.7%</div>
             </div>
         </div>
         
@@ -456,10 +457,10 @@
         <div class="mobile-header">
             <h1>2026 US Senate Forecast</h1>
             <h2 id="forecastAuthorMobile">by Jack Whitcomb</h2>
-            <div class="election-date">Election date: November 3, 2026 (last updated 3/11/2026)</div>
+            <div class="election-date">Election date: November 3, 2026 (last updated 3/13/2026)</div>
             <div class="mobile-odds">
                 <div class="mobile-odds-label">Odds that Republicans retain control:</div>
-                <div class="mobile-odds-value" id="currentOddsMobile">72.5%</div>
+                <div class="mobile-odds-value" id="currentOddsMobile">51.7%</div>
             </div>
         </div>
         
@@ -531,95 +532,98 @@
     <script>
         // Data sources
         const dataSources = {
+            // BEGIN_FORECAST_DATA
             jack: {
                 name: "Jack's forecast",
                 author: "by Jack Whitcomb",
-                dates: ['Sept 14', 'March 10'],
-                republicanOdds: [80, 72.5],
-                democraticOdds: [20, 27.5],
-                currentOdds: 72.5,
+                dates: ["2025-09-14", "2026-03-10", "2026-03-13"],
+                republicanOdds: [80, 72.5, 51.7],
+                democraticOdds: [20, 27.5, 46.4],
+                hungOdds: [0, 0, 1.8],
+                currentOdds: 51.7,
                 stateOdds: {
-                    'Alabama': { rep: 99, dem: 1 },
-                    'Alaska': { rep: 83, dem: 17 },
-                    'Arkansas': { rep: 99, dem: 1 },
-                    'Colorado': { rep: 9, dem: 91 },
-                    'Delaware': { rep: 5, dem: 95 },
-                    'Florida': { rep: 84, dem: 16 },
-                    'Georgia': { rep: 45, dem: 55 },
-                    'Idaho': { rep: 99, dem: 1 },
-                    'Illinois': { rep: 9, dem: 91 },
-                    'Iowa': { rep: 84, dem: 16 },
-                    'Kansas': { rep: 92, dem: 8 },
-                    'Kentucky': { rep: 99, dem: 1 },
-                    'Louisiana': { rep: 98, dem: 2 },
-                    'Maine': { rep: 22, dem: 78 },
-                    'Massachusetts': { rep: 1, dem: 99 },
-                    'Michigan': { rep: 44, dem: 56 },
-                    'Minnesota': { rep: 19, dem: 81 },
-                    'Mississippi': { rep: 97, dem: 3 },
-                    'Montana': { rep: 92, dem: 8 },
-                    'Nebraska': { rep: 93, dem: 7 },
-                    'New Hampshire': { rep: 41, dem: 59 },
-                    'New Jersey': { rep: 19, dem: 81 },
-                    'New Mexico': { rep: 19, dem: 81 },
-                    'North Carolina': { rep: 36, dem: 64 },
-                    'Ohio': { rep: 74, dem: 26 },
-                    'Oklahoma': { rep: 99, dem: 1 },
-                    'Oregon': { rep: 5, dem: 95 },
-                    'Rhode Island': { rep: 5, dem: 95 },
-                    'South Carolina': { rep: 73, dem: 27 },
-                    'South Dakota': { rep: 99, dem: 1 },
-                    'Tennessee': { rep: 99, dem: 1 },
-                    'Texas': { rep: 76, dem: 24 },
-                    'Virginia': { rep: 19, dem: 81 },
-                    'West Virginia': { rep: 99, dem: 1 },
-                    'Wyoming': { rep: 99, dem: 1 }
+                    'Alabama': { rep: 96.8, dem: 3.2, other: 0.0 },
+                    'Alaska': { rep: 31.4, dem: 68.6, other: 0.0 },
+                    'Arkansas': { rep: 97.4, dem: 2.6, other: 0.0 },
+                    'Colorado': { rep: 5.0, dem: 95.0, other: 0.0 },
+                    'Delaware': { rep: 3.0, dem: 97.0, other: 0.0 },
+                    'Florida': { rep: 72.1, dem: 27.9, other: 0.0 },
+                    'Georgia': { rep: 36.0, dem: 64.0, other: 0.0 },
+                    'Idaho': { rep: 98.9, dem: 1.1, other: 0.0 },
+                    'Illinois': { rep: 1.4, dem: 98.6, other: 0.0 },
+                    'Iowa': { rep: 59.4, dem: 40.6, other: 0.0 },
+                    'Kansas': { rep: 76.2, dem: 23.8, other: 0.0 },
+                    'Kentucky': { rep: 95.7, dem: 4.3, other: 0.0 },
+                    'Louisiana': { rep: 86.2, dem: 13.8, other: 0.0 },
+                    'Maine': { rep: 15.8, dem: 84.2, other: 0.0 },
+                    'Massachusetts': { rep: 0.3, dem: 99.7, other: 0.0 },
+                    'Michigan': { rep: 54.3, dem: 45.7, other: 0.0 },
+                    'Minnesota': { rep: 24.0, dem: 76.0, other: 0.0 },
+                    'Mississippi': { rep: 84.7, dem: 15.3, other: 0.0 },
+                    'Montana': { rep: 99.3, dem: 0.0, other: 0.7 },
+                    'Nebraska': { rep: 73.1, dem: 0.0, other: 26.9 },
+                    'New Hampshire': { rep: 35.1, dem: 64.9, other: 0.0 },
+                    'New Jersey': { rep: 11.3, dem: 88.7, other: 0.0 },
+                    'New Mexico': { rep: 22.6, dem: 77.4, other: 0.0 },
+                    'North Carolina': { rep: 5.6, dem: 94.4, other: 0.0 },
+                    'Ohio': { rep: 35.8, dem: 64.2, other: 0.0 },
+                    'Oklahoma': { rep: 96.5, dem: 3.5, other: 0.0 },
+                    'Oregon': { rep: 1.6, dem: 98.4, other: 0.0 },
+                    'Rhode Island': { rep: 1.1, dem: 98.9, other: 0.0 },
+                    'South Carolina': { rep: 80.5, dem: 19.5, other: 0.0 },
+                    'South Dakota': { rep: 98.5, dem: 1.6, other: 0.0 },
+                    'Tennessee': { rep: 97.3, dem: 2.7, other: 0.0 },
+                    'Texas': { rep: 63.7, dem: 36.3, other: 0.0 },
+                    'Virginia': { rep: 7.8, dem: 92.2, other: 0.0 },
+                    'West Virginia': { rep: 99.8, dem: 0.2, other: 0.0 },
+                    'Wyoming': { rep: 100.0, dem: 0.0, other: 0.0 }
                 }
             },
-                        // BEGIN_BETTING_DATA
+            // END_FORECAST_DATA
+                                    // BEGIN_BETTING_DATA
             betting: {
                 name: "Betting odds",
                 author: "odds from electionbettingodds.com",
-                dates: ["Nov 16", "Nov 23", "Nov 30", "Dec 7", "Dec 14", "Dec 21", "Dec 28", "Jan 4", "Jan 11", "Jan 18", "Jan 27", "Feb 3", "Feb 10", "Feb 17", "Feb 24", "Mar 3", "Mar 10", "Mar 17", "Mar 24", "Mar 31", "Apr 7", "Apr 14", "May 5", "May 12", "May 19", "May 26", "Jun 2", "Jun 9", "Jun 16", "Jun 23", "Jun 30", "Jul 7", "Jul 14", "Jul 21", "Jul 28", "Aug 4", "Aug 17", "Aug 24", "Aug 31", "Sep 7", "Sep 14", "Sep 21", "Sep 28", "Oct 5", "Oct 12", "Oct 19", "Oct 26", "Nov 2", "Nov 9", "Nov 16", "Nov 23", "Nov 30", "Dec 7", "Dec 14", "Dec 21", "Dec 28", "Jan 4", "Jan 11", "Jan 18", "Jan 25", "Feb 1", "Feb 8", "Feb 15", "Feb 22", "Mar 1", "Mar 8", "Mar 11"],
-                republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 53.5],
-                democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 46.5],
-                currentOdds: 53.5,
+                dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-13"],
+                republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 53.0],
+                democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 47.0],
+                currentOdds: 53.0,
                 stateOdds: {
-                    'Alabama': { rep: 94.7, dem: 4.0 },
-                    'Alaska': { rep: 51.5, dem: 47.7 },
-                    'Arkansas': { rep: 94.3, dem: 4.7 },
-                    'Colorado': { rep: 5.2, dem: 94.7 },
-                    'Delaware': { rep: 5.5, dem: 94.5 },
-                    'Florida': { rep: 87.0, dem: 13.0 },
-                    'Georgia': { rep: 18.6, dem: 81.2 },
-                    'Idaho': { rep: 94.8, dem: 5.0 },
-                    'Illinois': { rep: 4.8, dem: 94.2 },
-                    'Iowa': { rep: 64.8, dem: 35.2 },
-                    'Kansas': { rep: 94.3, dem: 4.7 },
-                    'Kentucky': { rep: 91.3, dem: 7.5 },
-                    'Louisiana': { rep: 91.5, dem: 8.0 },
-                    'Maine': { rep: 28.6, dem: 71.4 },
-                    'Massachusetts': { rep: 3.7, dem: 95.7 },
-                    'Michigan': { rep: 19.8, dem: 80.2 },
-                    'Minnesota': { rep: 10.8, dem: 89.2 },
+                    'Alabama': { rep: 95.0, dem: 5.0 },
+                    'Alaska': { rep: 51.3, dem: 48.3 },
+                    'Arkansas': { rep: 95.2, dem: 4.5 },
+                    'Colorado': { rep: 5.6, dem: 94.4 },
+                    'Delaware': { rep: 5.5, dem: 94.2 },
+                    'Florida': { rep: 86.9, dem: 13.1 },
+                    'Georgia': { rep: 18.9, dem: 81.1 },
+                    'Idaho': { rep: 94.7, dem: 5.2 },
+                    'Illinois': { rep: 4.9, dem: 94.6 },
+                    'Iowa': { rep: 64.1, dem: 35.9 },
+                    'Kansas': { rep: 95.2, dem: 4.5 },
+                    'Kentucky': { rep: 92.7, dem: 7.3 },
+                    'Louisiana': { rep: 91.1, dem: 8.9 },
+                    'Maine': { rep: 28.4, dem: 71.6 },
+                    'Massachusetts': { rep: 3.7, dem: 95.8 },
+                    'Michigan': { rep: 19.7, dem: 80.3 },
+                    'Minnesota': { rep: 10.6, dem: 89.4 },
                     'Mississippi': { rep: 92.7, dem: 7.3 },
-                    'Montana': { rep: 75.3, dem: 7.5 },
-                    'Nebraska': { rep: 68.8, dem: 1.0 },
-                    'New Hampshire': { rep: 14.7, dem: 81.2 },
-                    'New Jersey': { rep: 4.8, dem: 93.8 },
-                    'New Mexico': { rep: 2.5, dem: 97.1 },
-                    'North Carolina': { rep: 18.2, dem: 81.8 },
-                    'Ohio': { rep: 51.0, dem: 49.0 },
-                    'Oklahoma': { rep: 95.3, dem: 4.1 },
-                    'Oregon': { rep: 5.6, dem: 94.4 },
-                    'Rhode Island': { rep: 5.3, dem: 94.3 },
-                    'South Carolina': { rep: 83.5, dem: 13.8 },
-                    'South Dakota': { rep: 94.2, dem: 5.5 },
-                    'Tennessee': { rep: 93.5, dem: 6.3 },
-                    'Texas': { rep: 62.0, dem: 38.0 },
-                    'Virginia': { rep: 5.3, dem: 93.3 },
+                    'Montana': { rep: 82.8, dem: 9.7 },
+                    'Nebraska': { rep: 89.2, dem: 1.6 },
+                    'New Hampshire': { rep: 14.6, dem: 85.4 },
+                    'New Jersey': { rep: 4.9, dem: 94.6 },
+                    'New Mexico': { rep: 2.6, dem: 97.4 },
+                    'North Carolina': { rep: 17.8, dem: 82.2 },
+                    'Ohio': { rep: 50.9, dem: 49.1 },
+                    'Oklahoma': { rep: 95.8, dem: 4.1 },
+                    'Oregon': { rep: 5.5, dem: 94.2 },
+                    'Rhode Island': { rep: 5.4, dem: 94.1 },
+                    'South Carolina': { rep: 85.6, dem: 14.4 },
+                    'South Dakota': { rep: 94.2, dem: 5.3 },
+                    'Tennessee': { rep: 93.2, dem: 6.6 },
+                    'Texas': { rep: 61.0, dem: 39.0 },
+                    'Virginia': { rep: 5.4, dem: 93.8 },
                     'West Virginia': { rep: 93.8, dem: 5.2 },
-                    'Wyoming': { rep: 95.0, dem: 4.5 }
+                    'Wyoming': { rep: 95.2, dem: 4.5 }
                 }
             }
             // END_BETTING_DATA
@@ -639,8 +643,8 @@
                 const xScale = scales.x;
                 const yScale = scales.y;
 
-                options.lines.forEach(labelIndex => {
-                    const x = xScale.getPixelForValue(labelIndex);
+                options.lines.forEach(dateStr => {
+                    const x = xScale.getPixelForValue(new Date(dateStr));
                     const yTop = yScale.getPixelForValue(yScale.max);
                     const yBottom = yScale.getPixelForValue(yScale.min);
 
@@ -666,13 +670,13 @@
             const data = dataSources[source];
             const isJack = source === 'jack';
 
-            // Index 2 = 'March 10' (third label); only shown for Jack's forecast
-            const annotationLines = isJack ? [1] : [];
+            const annotationLines = isJack ? ['2026-03-10', '2026-03-13'] : [];
 
             if (chart) {
                 chart.data.labels = data.dates;
                 chart.data.datasets[0].data = data.republicanOdds;
                 chart.data.datasets[1].data = data.democraticOdds;
+                chart.data.datasets[2].data = data.hungOdds || [];
                 chart.options.plugins.updateLines.lines = annotationLines;
                 chart.options.plugins.updateLines.visible = isJack && showAnnotations;
                 chart.update();
@@ -703,6 +707,18 @@
                             pointRadius: 0,
                             pointHoverRadius: 6,
                             pointBackgroundColor: '#2563eb',
+                            pointBorderColor: '#fff',
+                            pointBorderWidth: 2
+                        }, {
+                            label: 'Hung Senate',
+                            data: data.hungOdds,
+                            borderColor: '#6b7280',
+                            backgroundColor: 'transparent',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            pointRadius: 0,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#6b7280',
                             pointBorderColor: '#fff',
                             pointBorderWidth: 2
                         }]
@@ -756,6 +772,15 @@
                                 }
                             },
                             x: {
+                                type: 'time',
+                                time: {
+                                    tooltipFormat: 'MMM d, yyyy',
+                                    displayFormats: {
+                                        day: 'MMM d',
+                                        week: 'MMM d',
+                                        month: 'MMM yyyy'
+                                    }
+                                },
                                 ticks: {
                                     font: {
                                         size: 14
@@ -814,7 +839,7 @@
                     tooltip
                         .html(`<strong>${state.name}</strong><br>
                             Republican: ${state.rep}%<br>
-                            Democrat: ${state.dem}%`)
+                            Democrat: ${state.dem}%` + (state.other > 0 ? `<br>Other: ${state.other}%` : ''))
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px")
                         .classed("show", true);
@@ -977,7 +1002,7 @@
                             tooltip
                                 .html(`<strong>${stateName}</strong><br>
                                     Republican: ${odds.rep}%<br>
-                                    Democrat: ${odds.dem}%`)
+                                    Democrat: ${odds.dem}%` + (odds.other > 0 ? `<br>Other: ${odds.other}%` : ''))
                                 .style("left", (event.pageX + 10) + "px")
                                 .style("top", (event.pageY - 28) + "px")
                                 .classed("show", true);
