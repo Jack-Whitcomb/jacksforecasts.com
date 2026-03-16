@@ -401,6 +401,56 @@
             .side-cartoon { height: 60px; }
             .chart-area { height: 200px; }
         }
+
+        /* ── PAGE NAV LINK ───────────────────────────────── */
+
+        .map-with-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .map-with-nav .map-wrap {
+            flex: 1;
+            min-width: 0;
+            margin-bottom: 0;
+        }
+        .map-nav-aside {
+            flex-shrink: 0;
+            width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page-nav-link {
+            display: block;
+            font-size: 15px;
+            font-style: italic;
+            font-weight: 600;
+            color: var(--ink-2);
+            text-decoration: none;
+            text-align: center;
+            line-height: 1.5;
+        }
+        .page-nav-link:hover { color: var(--ink); text-decoration: underline; }
+
+        @media (max-width: 680px) {
+            .map-with-nav { flex-direction: column; }
+            .map-nav-aside { width: 100%; text-align: left; }
+        }
+
+        /* ── SLIDE TRANSITIONS ───────────────────────────── */
+
+        @keyframes slideInFromRight {
+            from { transform: translateX(60px); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
+        }
+        @keyframes slideInFromLeft {
+            from { transform: translateX(-60px); opacity: 0; }
+            to   { transform: translateX(0);     opacity: 1; }
+        }
+        .slide-in-from-right { animation: slideInFromRight 0.35s ease-out; }
+        .slide-in-from-left  { animation: slideInFromLeft  0.35s ease-out; }
     </style>
 </head>
 <body>
@@ -462,8 +512,13 @@
         <div class="sec-head">
             <span class="sec-title">Race odds by state</span>
         </div>
-        <div class="map-wrap">
-            <svg id="map"></svg>
+        <div class="map-with-nav">
+            <div class="map-wrap">
+                <svg id="map"></svg>
+            </div>
+            <div class="map-nav-aside">
+                <a class="page-nav-link" id="toHouseLink" href="/house2026">Go to the House forecast &rarr;</a>
+            </div>
         </div>
         <div class="map-legend">
             <div class="mleg"><div class="mleg-sw" style="background:#1d4ed8"></div>Safe Democrat (80–100%)</div>
@@ -519,13 +574,13 @@
         // BEGIN_FORECAST_DATA
         jack: {
             author: "by Jack Whitcomb (assisted by Claude Sonnet 4.6)",
-            dates: ["2025-09-14", "2026-03-10", "2026-03-13", "2026-03-15"],
-            republicanOdds: [80, 72.5, 51.7, 51.9],
-            democraticOdds: [20, 27.5, 46.4, 46.4],
-            hungOdds: [0, 0, 1.8, 1.7],
-            currentOdds: 51.9,
+            dates: ["2025-09-14", "2026-03-10", "2026-03-13"],
+            republicanOdds: [80, 72.5, 51.7],
+            democraticOdds: [20, 27.5, 46.4],
+            hungOdds: [0, 0, 1.8],
+            currentOdds: 51.7,
             currentDemOdds: 46.4,
-            currentHungOdds: 1.7,
+            currentHungOdds: 1.8,
             stateOdds: {
                 'Alabama': { rep: 96.9, dem: 3.1, other: 0.0 },
                 'Alaska': { rep: 30.7, dem: 69.3, other: 0.0 },
@@ -569,31 +624,31 @@
         betting: {
             author: "odds from electionbettingodds.com",
             dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15"],
-            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5],
-            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5],
-            currentOdds: 49.5,
-            currentDemOdds: 50.5,
+            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 50.0],
+            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.0],
+            currentOdds: 50.0,
+            currentDemOdds: 50.0,
             currentHungOdds: 0,
             stateOdds: {
-                'Alabama': { rep: 95.6, dem: 4.4 },
-                'Alaska': { rep: 49.0, dem: 51.0 },
-                'Arkansas': { rep: 95.2, dem: 4.5 },
+                'Alabama': { rep: 95.3, dem: 4.4 },
+                'Alaska': { rep: 49.1, dem: 50.8 },
+                'Arkansas': { rep: 95.0, dem: 4.5 },
                 'Colorado': { rep: 5.0, dem: 95.0 },
                 'Delaware': { rep: 5.5, dem: 94.2 },
                 'Florida': { rep: 85.6, dem: 14.4 },
-                'Georgia': { rep: 18.9, dem: 81.1 },
+                'Georgia': { rep: 18.8, dem: 81.2 },
                 'Idaho': { rep: 94.7, dem: 5.2 },
                 'Illinois': { rep: 4.9, dem: 95.1 },
                 'Iowa': { rep: 58.3, dem: 41.7 },
-                'Kansas': { rep: 95.2, dem: 4.5 },
+                'Kansas': { rep: 95.0, dem: 4.5 },
                 'Kentucky': { rep: 92.2, dem: 7.8 },
                 'Louisiana': { rep: 92.0, dem: 8.0 },
                 'Maine': { rep: 27.8, dem: 72.2 },
                 'Massachusetts': { rep: 3.7, dem: 95.8 },
                 'Michigan': { rep: 19.5, dem: 80.5 },
-                'Minnesota': { rep: 10.5, dem: 89.5 },
+                'Minnesota': { rep: 10.8, dem: 89.2 },
                 'Mississippi': { rep: 92.4, dem: 7.6 },
-                'Montana': { rep: 85.0, dem: 9.0 },
+                'Montana': { rep: 84.8, dem: 9.0 },
                 'Nebraska': { rep: 84.1, dem: 2.9 },
                 'New Hampshire': { rep: 14.9, dem: 85.1 },
                 'New Jersey': { rep: 6.0, dem: 93.5 },
@@ -604,10 +659,10 @@
                 'Oregon': { rep: 5.5, dem: 94.2 },
                 'Rhode Island': { rep: 5.3, dem: 94.2 },
                 'South Carolina': { rep: 87.0, dem: 13.0 },
-                'South Dakota': { rep: 94.2, dem: 5.3 },
+                'South Dakota': { rep: 94.2, dem: 5.5 },
                 'Tennessee': { rep: 93.2, dem: 6.7 },
                 'Texas': { rep: 56.2, dem: 43.8 },
-                'Virginia': { rep: 5.4, dem: 93.8 },
+                'Virginia': { rep: 5.5, dem: 93.6 },
                 'West Virginia': { rep: 94.2, dem: 5.0 },
                 'Wyoming': { rep: 94.8, dem: 4.5 }
             }
@@ -1005,6 +1060,24 @@
 
     createMap();
     updateDisplay('jack');
+
+    // ── PAGE NAVIGATION ──────────────────────────────────────────────────────
+
+    // Outgoing: flag slide direction for house page
+    document.getElementById('toHouseLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        sessionStorage.setItem('slideFrom', 'left');
+        window.location.href = this.href;
+    });
+
+    // Incoming: slide in if returning from house page
+    (function() {
+        var dir = sessionStorage.getItem('slideFrom');
+        if (dir === 'right') {
+            sessionStorage.removeItem('slideFrom');
+            document.body.classList.add('slide-in-from-left');
+        }
+    })();
 </script>
 </body>
 </html>
