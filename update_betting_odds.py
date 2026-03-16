@@ -15,7 +15,7 @@ except ImportError:
     print("ERROR: 'requests' library not found. Run: pip install requests")
     sys.exit(1)
 
-HEADERS = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
+HEADERS  = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}
 HTML_FILE = 'senate2026.html'
 
 STATE_ABBR_TO_NAME = {
@@ -50,7 +50,7 @@ def scrape_control_odds():
 
     if not matches:
         print("WARNING: Could not find time series data in Senate-Control-2026.html")
-        return [], []
+        return [], [], []
 
     # Collect one data point per day (last reading of each day)
     by_day = {}
@@ -66,29 +66,24 @@ def scrape_control_odds():
 
     if not by_day:
         print("WARNING: No valid data points parsed.")
-        return [], []
+        return [], [], []
 
     sorted_days = sorted(by_day.keys())
 
-    # Thin data: keep one point per week to avoid chart clutter
-    # Always include first, last, and one per ~7 days
+    # Thin to one point per week; always include first and last
     thinned = [sorted_days[0]]
     for dt in sorted_days[1:]:
         if (dt - thinned[-1]).days >= 7:
             thinned.append(dt)
-    # Always include the most recent
     if thinned[-1] != sorted_days[-1]:
         thinned.append(sorted_days[-1])
 
-    dates = []
+    dates    = []
     rep_odds = []
     dem_odds = []
-    month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-                   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
-
     for dt in thinned:
         dem, rep = by_day[dt]
-        dates.append(f"{month_names[dt.month - 1]} {dt.day}")
+        dates.append(dt.strftime('%Y-%m-%d'))
         rep_odds.append(rep)
         dem_odds.append(dem)
 
@@ -110,9 +105,6 @@ def scrape_state_odds():
     failed = []
 
     for abbr, name in STATE_ABBR_TO_NAME.items():
-        # Look for the state name followed by odds in various formats:
-        # "StateName: Democrat: X% vs Republican: Y%"
-        # "StateName: Republican: X% vs Democrat: Y%"
         escaped = re.escape(name)
         pattern = (
             rf'{escaped}[^"\']*?'
@@ -122,16 +114,13 @@ def scrape_state_odds():
         match = re.search(pattern, html, re.IGNORECASE | re.DOTALL)
         if match:
             if match.group(1) is not None:
-                # Democrat listed first
                 dem = round(float(match.group(1)), 1)
                 rep = round(float(match.group(2)), 1)
             else:
-                # Republican listed first
                 rep = round(float(match.group(3)), 1)
                 dem = round(float(match.group(4)), 1)
             state_odds[name] = {'rep': rep, 'dem': dem}
         else:
-            # Check if it's a "no race" state (not in 2026 elections)
             no_race_pattern = rf'{escaped}[^"\']*?[Nn]o race'
             if not re.search(no_race_pattern, html):
                 failed.append(name)
@@ -146,55 +135,53 @@ def scrape_state_odds():
 
 
 def update_html(dates, rep_odds, dem_odds, state_odds):
-    """Update the betting data object in senate2026.html"""
+    """Update the betting data block in senate2026.html"""
     with open(HTML_FILE, 'r', encoding='utf-8') as f:
         html = f.read()
 
-    updated_on = datetime.now().strftime('%-m/%-d/%Y')
-
-    # Build new betting data block
-    dates_json = json.dumps(dates)
-    rep_json = json.dumps(rep_odds)
-    dem_json = json.dumps(dem_odds)
-    current = rep_odds[-1] if rep_odds else 0
+    current_rep = rep_odds[-1] if rep_odds else 0
+    current_dem = dem_odds[-1] if dem_odds else 0
 
     # Build stateOdds JS object string
     state_lines = []
     for state, odds in sorted(state_odds.items()):
-        state_lines.append(f"                    '{state}': {{ rep: {odds['rep']}, dem: {odds['dem']} }}")
+        state_lines.append(f"                '{state}': {{ rep: {odds['rep']}, dem: {odds['dem']} }}")
     state_odds_str = ',\n'.join(state_lines)
 
-    new_betting_block = (
-        f"            // BEGIN_BETTING_DATA\n"
-        f"            betting: {{\n"
-        f"                name: \"Betting odds\",\n"
-        f"                author: \"odds from electionbettingodds.com\",\n"
-        f"                dates: {dates_json},\n"
-        f"                republicanOdds: {rep_json},\n"
-        f"                democraticOdds: {dem_json},\n"
-        f"                currentOdds: {current},\n"
-        f"                stateOdds: {{\n"
+    now        = datetime.now()
+    updated_on = now.strftime('%b') + ' ' + str(now.day) + ', ' + str(now.year)
+
+    new_block = (
+        f"// BEGIN_BETTING_DATA\n"
+        f"        betting: {{\n"
+        f"            author: \"odds from electionbettingodds.com\",\n"
+        f"            dates: {json.dumps(dates)},\n"
+        f"            republicanOdds: {json.dumps(rep_odds)},\n"
+        f"            democraticOdds: {json.dumps(dem_odds)},\n"
+        f"            currentOdds: {current_rep},\n"
+        f"            currentDemOdds: {current_dem},\n"
+        f"            currentHungOdds: 0,\n"
+        f"            stateOdds: {{\n"
         f"{state_odds_str}\n"
-        f"                }}\n"
         f"            }}\n"
-        f"            // END_BETTING_DATA"
+        f"        }}\n"
+        f"        // END_BETTING_DATA"
     )
 
-    # Replace between marker comments
     start_marker = '// BEGIN_BETTING_DATA'
-    end_marker = '// END_BETTING_DATA'
+    end_marker   = '// END_BETTING_DATA'
     start_idx = html.find(start_marker)
-    end_idx = html.find(end_marker)
+    end_idx   = html.find(end_marker)
     if start_idx == -1 or end_idx == -1:
         print("ERROR: Could not find BEGIN_BETTING_DATA / END_BETTING_DATA markers in senate2026.html.")
         sys.exit(1)
 
-    new_html = html[:start_idx] + new_betting_block + html[end_idx + len(end_marker):]
+    new_html = html[:start_idx] + new_block + html[end_idx + len(end_marker):]
 
-    # Also update the "last updated" date in the desktop header
+    # Update the date in the JS heroId line
     new_html = re.sub(
-        r'(last updated )\d+/\d+/\d+',
-        rf'\g<1>{updated_on}',
+        r"'Updated [A-Za-z]+ \d+, \d+'",
+        f"'Updated {updated_on}'",
         new_html
     )
 
