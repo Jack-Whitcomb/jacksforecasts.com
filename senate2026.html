@@ -3,1038 +3,1081 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>U.S. Senate Odds</title>
+    <title>2026 Senate Forecast</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        /* Desktop header - shown by default */
-        .desktop-header {
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: flex-start;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-        
-        /* Mobile header - hidden by default */
-        .mobile-header {
-            display: none;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .mobile-header h1 {
-            font-size: 32px;
-            margin: 0 0 10px 0;
-            color: #333;
-            font-weight: 700;
-            line-height: 1.2;
-        }
-        
-        .mobile-header h2 {
-            margin: 0 0 10px 0;
-            color: #666;
-            font-size: 18px;
-        }
-        
-        .mobile-header .election-date {
-            color: #666;
-            font-size: 14px;
-            margin: 0 0 20px 0;
-        }
-        
-        .mobile-odds {
-            background: #f8f8f8;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 0 0 20px 0;
-        }
-        
-        .mobile-odds-label {
-            color: #666;
-            font-size: 16px;
-            margin-bottom: 8px;
-        }
-        
-        .mobile-odds-value {
-            color: #e74c3c;
-            font-size: 48px;
-            font-weight: 700;
-            line-height: 1;
-        }
-        
-        .title-section {
-            flex: 1;
-        }
-        
-        h1 {
-            font-size: 48px;
-            margin: 0;
-            color: #333;
-            font-weight: 700;
-            line-height: 1.1;
-        }
-        
-        h2 {
-            margin: 0;
-            color: #666;
-        }
-        
-        .election-date {
-            color: #666;
-            font-size: 18px;
-            margin: 0;
-        }
-        
-        .current-odds {
-            text-align: right;
-            padding: 0;
-            background: transparent;
-            border-radius: 0;
-            flex-shrink: 0;
-            min-width: 0;
-            max-width: 300px;
-        }
-        
-        .current-odds-label {
-            color: #666;
-            font-size: 18px;
-            margin-bottom: 10px;
-            word-wrap: break-word;
-            hyphens: auto;
-        }
-        
-        .current-odds-value {
-            color: #e74c3c;
-            font-size: 64px;
-            font-weight: 700;
-            line-height: 1;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 400px;
-            margin: 40px 0 20px 0;
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --rep: #dc2626;
+            --dem: #1d4ed8;
+            --rep-bg: #fef2f2;
+            --dem-bg: #eff6ff;
+            --ink: #111827;
+            --ink-2: #6b7280;
+            --rule: #e5e7eb;
+            --bg: #ffffff;
         }
 
-        /* Chart annotation legend */
-        .chart-annotation-note {
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── STICKY HEADER ───────────────────────────────── */
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 200;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--rule);
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin: 4px 0 0 0;
-            font-size: 12px;
-            font-style: italic;
-            color: #888;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 0 32px;
+            height: 52px;
         }
 
-        .chart-annotation-note input[type="checkbox"] {
-            accent-color: #999;
-            width: 14px;
-            height: 14px;
+        .topbar-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--ink);
+            letter-spacing: -0.01em;
+            white-space: nowrap;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+        }
+
+        .topbar-meta {
+            font-size: 12px;
+            color: var(--ink-2);
+            white-space: nowrap;
+        }
+
+        /* Tab toggles */
+        .tabs { display: flex; }
+
+        .tab {
+            font-family: inherit;
+            font-size: 13px;
+            font-weight: 500;
+            padding: 0 14px;
+            height: 52px;
+            border: none;
+            background: transparent;
+            color: var(--ink-2);
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
             cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .tab:hover:not(.active) { color: var(--ink); }
+
+        .tab.active {
+            color: var(--ink);
+            border-bottom-color: var(--ink);
+        }
+
+        /* ── PAGE BODY ───────────────────────────────────── */
+
+        .page {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 0 32px 96px;
+        }
+
+        /* ── TOP BAND ────────────────────────────────────── */
+
+        .top-band {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 6px 24px 0;
+        }
+
+        .side-stat {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-shrink: 0;
+            padding: 0 16px;
+        }
+
+        .side-cartoon {
+            height: 76px;
+            width: auto;
             flex-shrink: 0;
         }
 
-        .chart-annotation-note label {
+        .side-stat-party {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .side-stat-party.rep { color: var(--rep); }
+        .side-stat-party.dem { color: var(--dem); }
+
+        .side-stat-pct {
+            font-size: 40px;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: -0.04em;
+            margin-bottom: 4px;
+        }
+
+        .side-stat-pct.rep { color: var(--rep); }
+        .side-stat-pct.dem { color: var(--dem); }
+
+        .side-stat-label {
+            font-size: 12px;
+            color: var(--ink-2);
+            line-height: 1.3;
+        }
+
+        .side-stat-metaphor {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+            font-style: italic;
+        }
+
+        .bar-middle {
+            flex: 1;
+            min-width: 0;
+            padding-top: 4px;
+        }
+
+        .bar-middle .state-bar-container {
+            margin: 0 0 14px;
+        }
+
+        .hero-hung {
+            padding: 16px 0 8px;
+            font-size: 11px;
+            color: #9ca3af;
+        }
+
+        .top-band-foot {
+            font-size: 11px;
+            font-style: italic;
+            color: var(--ink-2);
+            padding: 4px 0 8px;
+        }
+
+        /* ── SECTION TEMPLATE ────────────────────────────── */
+
+        .section {
+            padding-top: 48px;
+            border-top: 1px solid var(--rule);
+        }
+
+        .top-band-foot + .section {
+            padding-top: 10px;
+        }
+
+        .sec-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .sec-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--ink-2);
+            white-space: nowrap;
+        }
+
+
+        .annot-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--ink-2);
             cursor: pointer;
             user-select: none;
+            white-space: nowrap;
         }
-        
-        /* Data source toggle buttons */
-        .data-source-toggle {
+
+        .annot-wrap input { cursor: pointer; }
+
+        /* ── CHART ───────────────────────────────────────── */
+
+        .chart-area {
+            position: relative;
+            height: 340px;
+            margin-bottom: 48px;
+        }
+
+        /* Small legend inline with chart */
+        .chart-legend {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 20px 0 40px 0;
+            gap: 20px;
+            margin-bottom: 16px;
         }
-        
-        .source-button {
-            padding: 10px 20px;
-            font-size: 16px;
-            font-weight: 500;
-            border: 2px solid #ddd;
-            background: white;
-            color: #666;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+
+        .cleg {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--ink-2);
         }
-        
-        .source-button:hover {
-            border-color: #999;
-            background: #f8f8f8;
+
+        .cleg-line {
+            width: 20px; height: 2px;
+            border-radius: 1px;
+            flex-shrink: 0;
         }
-        
-        .source-button.active {
-            background: #333;
-            color: white;
-            border-color: #333;
-        }
-        
-        .hover-instruction {
-            text-align: center;
-            color: #999;
-            margin: 20px 0;
-            font-size: 16px;
-        }
-        #map-container {
-            margin-top: 40px;
-            text-align: center;
-            position: relative;
-        }
-        
-        /* State bar visualization styles */
+
+        /* ── STATE BAR ───────────────────────────────────── */
+
         .state-bar-container {
-            margin: 30px 0;
+            margin: 30px 0 48px;
             position: relative;
         }
+
         .state-bar {
             display: flex;
             width: 100%;
-            height: 60px;
+            height: 52px;
             border: 2px solid #333;
             border-radius: 4px;
             overflow: hidden;
             background: white;
         }
+
         .state-segment {
             cursor: pointer;
             transition: opacity 0.2s, transform 0.2s;
             border-right: 1px solid rgba(255,255,255,0.3);
             position: relative;
         }
-        .state-segment:last-child {
-            border-right: none;
-        }
-        .state-segment:hover {
+
+        .state-segment:last-child { border-right: none; }
+
+        .state-segment:hover, .state-segment.highlight {
             opacity: 0.8;
             transform: scaleY(1.1);
             z-index: 10;
         }
-        .state-segment.highlight {
-            opacity: 0.8;
-            transform: scaleY(1.1);
-            z-index: 10;
-        }
+
         .majority-line {
             position: absolute;
-            top: -10px;
-            height: 80px;
+            top: -8px;
+            height: 68px;
             width: 2px;
             background: #333;
             pointer-events: none;
             z-index: 20;
         }
+
         .majority-label {
             position: absolute;
-            top: -30px;
+            top: 76px;
             transform: translateX(-50%);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             white-space: nowrap;
-            color: #333;
+            color: var(--ink);
             background: white;
-            padding: 5px 10px;
+            padding: 4px 10px;
             border-radius: 4px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+
         .seats-label {
             position: absolute;
-            top: 70px;
-            font-size: 14px;
-            color: #666;
-            background: white;
-            padding: 2px 8px;
-            border-radius: 4px;
+            top: 60px;
+            font-size: 12px;
+            color: var(--ink-2);
+            padding: 2px 0;
         }
-        .seats-label.left {
-            left: 0;
-        }
-        .seats-label.right {
-            right: 0;
-        }
-        
+
+        .seats-label.left { left: 0; }
+        .seats-label.right { right: 0; }
+
+        /* ── MAP ─────────────────────────────────────────── */
+
+        .map-wrap { width: 100%; overflow-x: auto; margin-bottom: 20px; }
+
         .state {
             stroke: #fff;
             stroke-width: 1px;
             cursor: pointer;
-            transition: opacity 0.2s;
+            transition: opacity 0.15s;
         }
-        .state:hover {
-            opacity: 0.8;
-            stroke-width: 2px;
-            stroke: #333;
+
+        .state:hover, .state.highlight {
+            opacity: 0.7;
+            stroke: #374151;
+            stroke-width: 1.5px;
         }
-        .state.highlight {
-            opacity: 0.8;
-            stroke-width: 2px;
-            stroke: #333;
-        }
-        .tooltip {
-            position: absolute;
-            padding: 10px 15px;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            border-radius: 5px;
-            pointer-events: none;
-            font-size: 14px;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .tooltip.show {
-            opacity: 1;
-        }
-        .legend {
+
+        .map-legend {
             display: flex;
             flex-wrap: wrap;
-            justify-content: center;
-            margin-top: 20px;
-            gap: 15px;
+            gap: 14px;
+            padding-bottom: 48px;
         }
-        .legend-item {
+
+        .mleg {
             display: flex;
             align-items: center;
-            gap: 8px;
-            font-size: 14px;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--ink-2);
         }
-        .legend-color {
-            width: 20px;
-            height: 20px;
-            border-radius: 3px;
+
+        .mleg-sw {
+            width: 12px; height: 12px;
+            border-radius: 2px;
             flex-shrink: 0;
         }
-        .map-title {
-            font-size: 24px;
+
+        /* ── TOOLTIP ─────────────────────────────────────── */
+
+        .tt {
+            position: absolute;
+            padding: 9px 13px;
+            background: #fff;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            font-size: 13px;
+            line-height: 1.65;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.12s;
+            z-index: 9999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+        }
+
+        .tt.show { opacity: 1; }
+
+        /* ── RESPONSIVE ──────────────────────────────────── */
+
+        @media (max-width: 680px) {
+            .topbar { padding: 0 16px; }
+            .topbar-meta { display: none; }
+            .page { padding: 0 16px 72px; }
+
+            .top-band { flex-wrap: wrap; padding: 28px 12px 0; }
+            .side-stat { flex: 1; padding: 0 8px; }
+            .bar-middle { flex-basis: 100%; padding-top: 44px; }
+
+            .chart-area { height: 240px; }
+        }
+
+        @media (max-width: 420px) {
+            .side-stat-pct { font-size: 36px; }
+            .side-cartoon { height: 60px; }
+            .chart-area { height: 200px; }
+        }
+
+        /* ── PAGE NAV LINK ───────────────────────────────── */
+
+        .map-with-nav {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .map-with-nav .map-wrap {
+            flex: 1;
+            min-width: 0;
+            margin-bottom: 0;
+        }
+        .map-nav-aside {
+            flex-shrink: 0;
+            width: 140px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .page-nav-link {
+            display: block;
+            font-size: 15px;
+            font-style: italic;
             font-weight: 600;
-            margin-bottom: 40px;
-            color: #333;
+            color: var(--ink-2);
+            text-decoration: none;
+            text-align: center;
+            line-height: 1.5;
         }
-        
-        /* Responsive map container */
-        .map-svg-container {
-            width: 100%;
-            overflow-x: auto;
-            border-radius: 8px;
+        .page-nav-link:hover { color: var(--ink); text-decoration: underline; }
+
+        @media (max-width: 680px) {
+            .map-with-nav { flex-direction: column; }
+            .map-nav-aside { width: 100%; text-align: left; }
         }
-        
-        /* Mobile-specific styles */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 20px;
-            }
-            
-            /* Hide desktop header, show mobile header */
-            .desktop-header {
-                display: none;
-            }
-            
-            .mobile-header {
-                display: block;
-            }
-            
-            .chart-container {
-                height: 300px;
-                margin: 30px 0 15px 0;
-            }
-            
-            .data-source-toggle {
-                margin: 15px 0 30px 0;
-            }
-            
-            .source-button {
-                padding: 8px 16px;
-                font-size: 14px;
-            }
-            
-            .map-title {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
-            
-            .majority-label {
-                font-size: 12px;
-                top: -25px;
-                padding: 3px 6px;
-            }
-            
-            .seats-label {
-                font-size: 12px;
-                padding: 2px 6px;
-            }
-            
-            .legend {
-                gap: 10px;
-            }
-            
-            .legend-item {
-                font-size: 12px;
-                flex: 1 1 calc(50% - 10px);
-                min-width: 140px;
-            }
-            
-            .hover-instruction {
-                font-size: 14px;
-            }
-            
-            /* Stack legend items vertically on very small screens */
-            @media (max-width: 480px) {
-                .mobile-header h1 {
-                    font-size: 28px;
-                }
-                
-                .mobile-header h2 {
-                    font-size: 16px;
-                }
-                
-                .mobile-odds-value {
-                    font-size: 42px;
-                }
-                
-                .legend-item {
-                    flex: 1 1 100%;
-                    justify-content: center;
-                }
-                
-                .majority-label {
-                    font-size: 10px;
-                    padding: 2px 4px;
-                    top: -22px;
-                }
-                
-                .seats-label {
-                    font-size: 10px;
-                }
-            }
+
+        /* ── SLIDE TRANSITIONS ───────────────────────────── */
+
+        @keyframes slideInFromRight {
+            from { transform: translateX(60px); opacity: 0; }
+            to   { transform: translateX(0);    opacity: 1; }
         }
-        
-        @media (max-width: 480px) {
-            .chart-container {
-                height: 250px;
-            }
+        @keyframes slideInFromLeft {
+            from { transform: translateX(-60px); opacity: 0; }
+            to   { transform: translateX(0);     opacity: 1; }
         }
+        .slide-in-from-right { animation: slideInFromRight 0.35s ease-out; }
+        .slide-in-from-left  { animation: slideInFromLeft  0.35s ease-out; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Desktop Header (hidden on mobile) -->
-        <div class="desktop-header">
-            <div class="title-section">
-                <h1>2026 US Senate Forecast</h1>
-                <h2 id="forecastAuthor">by Jack Whitcomb</h2>
-                <div class="election-date">Election date: November 3, 2026 (last updated 3/13/2026)</div>
-            </div>
-            <div class="current-odds">
-                <div class="current-odds-label">Odds that Republicans retain control:</div>
-                <div class="current-odds-value" id="currentOddsDesktop">51.7%</div>
-            </div>
-        </div>
-        
-        <!-- Mobile Header (hidden on desktop) -->
-        <div class="mobile-header">
-            <h1>2026 US Senate Forecast</h1>
-            <h2 id="forecastAuthorMobile">by Jack Whitcomb</h2>
-            <div class="election-date">Election date: November 3, 2026 (last updated 3/13/2026)</div>
-            <div class="mobile-odds">
-                <div class="mobile-odds-label">Odds that Republicans retain control:</div>
-                <div class="mobile-odds-value" id="currentOddsMobile">51.7%</div>
-            </div>
-        </div>
-        
-        <div class="hover-instruction">Note: development of this election model is ongoing</div>
-        
-        <div class="chart-container">
-            <canvas id="oddsChart"></canvas>
-        </div>
 
-        <!-- Annotation note: only shown for Jack's forecast -->
-        <div class="chart-annotation-note" id="annotationNote">
-            <input type="checkbox" id="showAnnotations" checked>
-            <label for="showAnnotations">Model updates marked with grey dotted lines.</label>
+<!-- STICKY TOPBAR -->
+<div class="topbar">
+    <span class="topbar-title">2026 U.S. Senate Majority Forecast</span>
+    <div class="topbar-right">
+        <span class="topbar-meta" id="topbarMeta"></span>
+        <div class="tabs">
+            <button class="tab active" id="jackForecast">Jack's forecast</button>
+            <button class="tab" id="bettingOdds">Betting odds</button>
         </div>
-        
-        <div class="data-source-toggle">
-            <button class="source-button active" id="jackForecast">Jack's forecast</button>
-            <button class="source-button" id="bettingOdds">Betting odds</button>
+    </div>
+</div>
+
+<!-- TOP BAND: odds + bar (full viewport width) -->
+<div class="top-band">
+    <div class="side-stat dem-side">
+        <img src="schumer_cartoon.png" class="side-cartoon" alt="Schumer">
+        <div>
+            <div class="side-stat-party dem">Democrats</div>
+            <div class="side-stat-pct dem" id="heroDemPct"></div>
+            <div class="side-stat-label">chance of majority</div>
+            <div class="side-stat-metaphor" id="heroDemMeta"></div>
         </div>
-        
-        <div id="map-container">
-            <div class="map-title">Senate Race Odds by State</div>
-            
-            <!-- State bar visualization -->
-            <div class="state-bar-container">
-                <div id="stateBar" class="state-bar"></div>
-                <div class="majority-line" id="majorityLine">
-                    <div class="majority-label">50 seats needed for Republican majority (VP acts as tiebreaker)</div>
-                </div>
-                <div class="seats-label left">
-                    <span style="color: #2563eb;">&#9642; </span> 34 seats not up for election
-                </div>
-                <div class="seats-label right">
-                    <span style="color: #dc2626;">&#9642; </span> 31 seats not up for election
-                </div>
-            </div>
-            
-            <div class="map-svg-container">
-                <svg id="map"></svg>
-            </div>
-            
-            <div class="legend">
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #2563eb;"></div>
-                    <span>Safe Democrat (80-100%)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #60a5fa;"></div>
-                    <span>Lean Democrat (60-80%)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #c084fc;"></div>
-                    <span>Toss-up (40-60%)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #f87171;"></div>
-                    <span>Lean Republican (60-80%)</span>
-                </div>
-                <div class="legend-item">
-                    <div class="legend-color" style="background: #dc2626;"></div>
-                    <span>Safe Republican (80-100%)</span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="tooltip"></div>
     </div>
 
-    <script>
-        // Data sources
-        const dataSources = {
-            // BEGIN_FORECAST_DATA
-            jack: {
-                name: "Jack's forecast",
-                author: "by Jack Whitcomb",
-                dates: ["2025-09-14", "2026-03-10", "2026-03-13"],
-                republicanOdds: [80, 72.5, 51.7],
-                democraticOdds: [20, 27.5, 46.4],
-                hungOdds: [0, 0, 1.8],
-                currentOdds: 51.7,
-                stateOdds: {
-                    'Alabama': { rep: 96.8, dem: 3.2, other: 0.0 },
-                    'Alaska': { rep: 31.4, dem: 68.6, other: 0.0 },
-                    'Arkansas': { rep: 97.4, dem: 2.6, other: 0.0 },
-                    'Colorado': { rep: 5.0, dem: 95.0, other: 0.0 },
-                    'Delaware': { rep: 3.0, dem: 97.0, other: 0.0 },
-                    'Florida': { rep: 72.1, dem: 27.9, other: 0.0 },
-                    'Georgia': { rep: 36.0, dem: 64.0, other: 0.0 },
-                    'Idaho': { rep: 98.9, dem: 1.1, other: 0.0 },
-                    'Illinois': { rep: 1.4, dem: 98.6, other: 0.0 },
-                    'Iowa': { rep: 59.4, dem: 40.6, other: 0.0 },
-                    'Kansas': { rep: 76.2, dem: 23.8, other: 0.0 },
-                    'Kentucky': { rep: 95.7, dem: 4.3, other: 0.0 },
-                    'Louisiana': { rep: 86.2, dem: 13.8, other: 0.0 },
-                    'Maine': { rep: 15.8, dem: 84.2, other: 0.0 },
-                    'Massachusetts': { rep: 0.3, dem: 99.7, other: 0.0 },
-                    'Michigan': { rep: 54.3, dem: 45.7, other: 0.0 },
-                    'Minnesota': { rep: 24.0, dem: 76.0, other: 0.0 },
-                    'Mississippi': { rep: 84.7, dem: 15.3, other: 0.0 },
-                    'Montana': { rep: 99.3, dem: 0.0, other: 0.7 },
-                    'Nebraska': { rep: 73.1, dem: 0.0, other: 26.9 },
-                    'New Hampshire': { rep: 35.1, dem: 64.9, other: 0.0 },
-                    'New Jersey': { rep: 11.3, dem: 88.7, other: 0.0 },
-                    'New Mexico': { rep: 22.6, dem: 77.4, other: 0.0 },
-                    'North Carolina': { rep: 5.6, dem: 94.4, other: 0.0 },
-                    'Ohio': { rep: 35.8, dem: 64.2, other: 0.0 },
-                    'Oklahoma': { rep: 96.5, dem: 3.5, other: 0.0 },
-                    'Oregon': { rep: 1.6, dem: 98.4, other: 0.0 },
-                    'Rhode Island': { rep: 1.1, dem: 98.9, other: 0.0 },
-                    'South Carolina': { rep: 80.5, dem: 19.5, other: 0.0 },
-                    'South Dakota': { rep: 98.5, dem: 1.6, other: 0.0 },
-                    'Tennessee': { rep: 97.3, dem: 2.7, other: 0.0 },
-                    'Texas': { rep: 63.7, dem: 36.3, other: 0.0 },
-                    'Virginia': { rep: 7.8, dem: 92.2, other: 0.0 },
-                    'West Virginia': { rep: 99.8, dem: 0.2, other: 0.0 },
-                    'Wyoming': { rep: 100.0, dem: 0.0, other: 0.0 }
-                }
-            },
-            // END_FORECAST_DATA
-                                    // BEGIN_BETTING_DATA
-            betting: {
-                name: "Betting odds",
-                author: "odds from electionbettingodds.com",
-                dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-13"],
-                republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 53.0],
-                democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 47.0],
-                currentOdds: 53.0,
-                stateOdds: {
-                    'Alabama': { rep: 95.0, dem: 5.0 },
-                    'Alaska': { rep: 51.3, dem: 48.3 },
-                    'Arkansas': { rep: 95.2, dem: 4.5 },
-                    'Colorado': { rep: 5.6, dem: 94.4 },
-                    'Delaware': { rep: 5.5, dem: 94.2 },
-                    'Florida': { rep: 86.9, dem: 13.1 },
-                    'Georgia': { rep: 18.9, dem: 81.1 },
-                    'Idaho': { rep: 94.7, dem: 5.2 },
-                    'Illinois': { rep: 4.9, dem: 94.6 },
-                    'Iowa': { rep: 64.1, dem: 35.9 },
-                    'Kansas': { rep: 95.2, dem: 4.5 },
-                    'Kentucky': { rep: 92.7, dem: 7.3 },
-                    'Louisiana': { rep: 91.1, dem: 8.9 },
-                    'Maine': { rep: 28.4, dem: 71.6 },
-                    'Massachusetts': { rep: 3.7, dem: 95.8 },
-                    'Michigan': { rep: 19.7, dem: 80.3 },
-                    'Minnesota': { rep: 10.6, dem: 89.4 },
-                    'Mississippi': { rep: 92.7, dem: 7.3 },
-                    'Montana': { rep: 82.8, dem: 9.7 },
-                    'Nebraska': { rep: 89.2, dem: 1.6 },
-                    'New Hampshire': { rep: 14.6, dem: 85.4 },
-                    'New Jersey': { rep: 4.9, dem: 94.6 },
-                    'New Mexico': { rep: 2.6, dem: 97.4 },
-                    'North Carolina': { rep: 17.8, dem: 82.2 },
-                    'Ohio': { rep: 50.9, dem: 49.1 },
-                    'Oklahoma': { rep: 95.8, dem: 4.1 },
-                    'Oregon': { rep: 5.5, dem: 94.2 },
-                    'Rhode Island': { rep: 5.4, dem: 94.1 },
-                    'South Carolina': { rep: 85.6, dem: 14.4 },
-                    'South Dakota': { rep: 94.2, dem: 5.3 },
-                    'Tennessee': { rep: 93.2, dem: 6.6 },
-                    'Texas': { rep: 61.0, dem: 39.0 },
-                    'Virginia': { rep: 5.4, dem: 93.8 },
-                    'West Virginia': { rep: 93.8, dem: 5.2 },
-                    'Wyoming': { rep: 95.2, dem: 4.5 }
-                }
+    <div class="bar-middle">
+        <div class="state-bar-container">
+            <div id="stateBar" class="state-bar"></div>
+            <div class="majority-line" id="majorityLine">
+                <div class="majority-label">50 seats needed for Republican majority</div>
+            </div>
+            <div class="seats-label left"><span style="color:#1d4ed8;">&#9642;</span> 34 seats not up for election</div>
+            <div class="seats-label right"><span style="color:#dc2626;">&#9642;</span> 31 seats not up for election</div>
+        </div>
+        <div class="hero-hung" id="heroHungRow">
+            Odds of a hung senate (no majority): <strong id="heroHungPct"></strong>
+        </div>
+    </div>
+
+    <div class="side-stat rep-side">
+        <div>
+            <div class="side-stat-party rep">Republicans</div>
+            <div class="side-stat-pct rep" id="heroRepPct"></div>
+            <div class="side-stat-label">chance of majority</div>
+            <div class="side-stat-metaphor" id="heroRepMeta"></div>
+        </div>
+        <img src="thune_cartoon.png" class="side-cartoon" alt="Thune">
+    </div>
+</div>
+
+<div class="page">
+    <div class="top-band-foot"><span id="heroId"></span></div>
+
+    <!-- SECTION: MAP -->
+    <div class="section">
+        <div class="sec-head">
+            <span class="sec-title">Race odds by state</span>
+        </div>
+        <div class="map-with-nav">
+            <div class="map-wrap">
+                <svg id="map"></svg>
+            </div>
+            <div class="map-nav-aside">
+                <a class="page-nav-link" id="toHouseLink" href="/house2026">Go to the House forecast &rarr;</a>
+            </div>
+        </div>
+        <div class="map-legend">
+            <div class="mleg"><div class="mleg-sw" style="background:#1d4ed8"></div>Safe Democrat (80–100%)</div>
+            <div class="mleg"><div class="mleg-sw" style="background:#60a5fa"></div>Lean Democrat (60–80%)</div>
+            <div class="mleg"><div class="mleg-sw" style="background:#c084fc"></div>Toss-up (40–60%)</div>
+            <div class="mleg"><div class="mleg-sw" style="background:#f87171"></div>Lean Republican (60–80%)</div>
+            <div class="mleg"><div class="mleg-sw" style="background:#dc2626"></div>Safe Republican (80–100%)</div>
+        </div>
+    </div>
+
+    <!-- SECTION: PROBABILITY OVER TIME -->
+    <div class="section">
+        <div class="sec-head">
+            <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
+                <span class="sec-title">Probability over time</span>
+                <div class="chart-legend">
+                    <div class="cleg"><div class="cleg-line" style="background:var(--rep)"></div>Republican</div>
+                    <div class="cleg"><div class="cleg-line" style="background:var(--dem)"></div>Democratic</div>
+                    <div class="cleg" id="hungLegend" style="display:none"><div class="cleg-line" style="background:#9ca3af"></div>Hung Senate</div>
+                </div>
+            </div>
+            <label class="annot-wrap" id="annotWrap">
+                <input type="checkbox" id="showAnnotations" checked>
+                Show model updates
+            </label>
+        </div>
+        <div class="chart-area">
+            <canvas id="oddsChart"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<div class="tt"></div>
+
+<script>
+    // ── DATA ─────────────────────────────────────────────────────────────────
+
+    const stateAbbr = {
+        'Alabama':'AL','Alaska':'AK','Arkansas':'AR','Colorado':'CO',
+        'Delaware':'DE','Florida':'FL','Georgia':'GA','Idaho':'ID',
+        'Illinois':'IL','Iowa':'IA','Kansas':'KS','Kentucky':'KY',
+        'Louisiana':'LA','Maine':'ME','Massachusetts':'MA','Michigan':'MI',
+        'Minnesota':'MN','Mississippi':'MS','Montana':'MT','Nebraska':'NE',
+        'New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM',
+        'North Carolina':'NC','Ohio':'OH','Oklahoma':'OK','Oregon':'OR',
+        'Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',
+        'Tennessee':'TN','Texas':'TX','Virginia':'VA',
+        'West Virginia':'WV','Wyoming':'WY'
+    };
+
+    const dataSources = {
+        // BEGIN_FORECAST_DATA
+        jack: {
+            author: "by Jack Whitcomb (assisted by Claude Sonnet 4.6)",
+            dates: ["2025-09-14", "2026-03-10", "2026-03-13", "2026-03-15", "2026-03-16"],
+            republicanOdds: [80, 72.5, 51.7, 51.7, 48.5],
+            democraticOdds: [20, 27.5, 46.4, 46.4, 49.2],
+            hungOdds: [0, 0, 1.8, 1.8, 2.4],
+            currentOdds: 48.5,
+            currentDemOdds: 49.2,
+            currentHungOdds: 2.4,
+            stateOdds: {
+                'Alabama': { rep: 87.2, dem: 12.8, other: 0.0 },
+                'Alaska': { rep: 35.7, dem: 64.3, other: 0.0 },
+                'Arkansas': { rep: 87.6, dem: 12.4, other: 0.0 },
+                'Colorado': { rep: 12.4, dem: 87.6, other: 0.0 },
+                'Delaware': { rep: 8.3, dem: 91.7, other: 0.0 },
+                'Florida': { rep: 67.1, dem: 32.9, other: 0.0 },
+                'Georgia': { rep: 30.1, dem: 69.9, other: 0.0 },
+                'Idaho': { rep: 91.5, dem: 8.5, other: 0.0 },
+                'Illinois': { rep: 9.9, dem: 90.1, other: 0.0 },
+                'Iowa': { rep: 55.1, dem: 44.9, other: 0.0 },
+                'Kansas': { rep: 65.8, dem: 34.2, other: 0.0 },
+                'Kentucky': { rep: 83.3, dem: 16.6, other: 0.0 },
+                'Louisiana': { rep: 76.4, dem: 23.6, other: 0.0 },
+                'Maine': { rep: 20.4, dem: 79.6, other: 0.0 },
+                'Massachusetts': { rep: 3.2, dem: 96.8, other: 0.0 },
+                'Michigan': { rep: 43.8, dem: 56.2, other: 0.0 },
+                'Minnesota': { rep: 23.6, dem: 76.5, other: 0.0 },
+                'Mississippi': { rep: 74.9, dem: 25.1, other: 0.0 },
+                'Montana': { rep: 99.9, dem: 0.0, other: 0.1 },
+                'Nebraska': { rep: 74.1, dem: 0.0, other: 25.9 },
+                'New Hampshire': { rep: 32.2, dem: 67.8, other: 0.0 },
+                'New Jersey': { rep: 19.0, dem: 81.0, other: 0.0 },
+                'New Mexico': { rep: 21.4, dem: 78.6, other: 0.0 },
+                'North Carolina': { rep: 24.6, dem: 75.5, other: 0.0 },
+                'Ohio': { rep: 53.8, dem: 46.2, other: 0.0 },
+                'Oklahoma': { rep: 89.1, dem: 10.9, other: 0.0 },
+                'Oregon': { rep: 7.6, dem: 92.4, other: 0.0 },
+                'Rhode Island': { rep: 7.5, dem: 92.5, other: 0.0 },
+                'South Carolina': { rep: 69.5, dem: 30.5, other: 0.0 },
+                'South Dakota': { rep: 89.6, dem: 10.4, other: 0.0 },
+                'Tennessee': { rep: 84.9, dem: 15.1, other: 0.0 },
+                'Texas': { rep: 67.3, dem: 32.7, other: 0.0 },
+                'Virginia': { rep: 17.6, dem: 82.4, other: 0.0 },
+                'West Virginia': { rep: 95.8, dem: 4.2, other: 0.0 },
+                'Wyoming': { rep: 97.8, dem: 2.2, other: 0.0 }
             }
-            // END_BETTING_DATA
-        };
-        
-        let currentSource = 'jack';
-        let chart = null;
-        let showAnnotations = true;
-
-        // Custom Chart.js plugin to draw dotted vertical annotation lines
-        const updateLinesPlugin = {
-            id: 'updateLines',
-            afterDraw(chartInstance, args, options) {
-                if (!options.lines || !options.lines.length || !options.visible) return;
-
-                const { ctx, scales } = chartInstance;
-                const xScale = scales.x;
-                const yScale = scales.y;
-
-                options.lines.forEach(dateStr => {
-                    const x = xScale.getPixelForValue(new Date(dateStr));
-                    const yTop = yScale.getPixelForValue(yScale.max);
-                    const yBottom = yScale.getPixelForValue(yScale.min);
-
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.setLineDash([5, 5]);
-                    ctx.strokeStyle = 'rgba(150, 150, 150, 0.6)';
-                    ctx.lineWidth = 1.5;
-                    ctx.moveTo(x, yTop);
-                    ctx.lineTo(x, yBottom);
-                    ctx.stroke();
-                    ctx.restore();
-                });
+        },
+        // END_FORECAST_DATA
+        // BEGIN_BETTING_DATA
+        betting: {
+            author: "odds from electionbettingodds.com",
+            dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-16"],
+            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5, 50.5],
+            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5, 49.5],
+            currentOdds: 50.5,
+            currentDemOdds: 49.5,
+            currentHungOdds: 0,
+            stateOdds: {
+                'Alabama': { rep: 95.3, dem: 4.4 },
+                'Alaska': { rep: 48.6, dem: 51.3 },
+                'Arkansas': { rep: 95.0, dem: 4.5 },
+                'Colorado': { rep: 5.0, dem: 95.0 },
+                'Delaware': { rep: 5.6, dem: 94.2 },
+                'Florida': { rep: 84.3, dem: 15.7 },
+                'Georgia': { rep: 19.3, dem: 80.7 },
+                'Idaho': { rep: 94.7, dem: 5.2 },
+                'Illinois': { rep: 4.9, dem: 95.1 },
+                'Iowa': { rep: 58.5, dem: 41.5 },
+                'Kansas': { rep: 95.0, dem: 4.5 },
+                'Kentucky': { rep: 92.2, dem: 7.8 },
+                'Louisiana': { rep: 92.0, dem: 8.0 },
+                'Maine': { rep: 28.8, dem: 70.8 },
+                'Massachusetts': { rep: 3.7, dem: 95.8 },
+                'Michigan': { rep: 20.7, dem: 79.3 },
+                'Minnesota': { rep: 11.5, dem: 88.5 },
+                'Mississippi': { rep: 92.4, dem: 7.6 },
+                'Montana': { rep: 84.9, dem: 9.1 },
+                'Nebraska': { rep: 84.2, dem: 2.8 },
+                'New Hampshire': { rep: 13.9, dem: 86.1 },
+                'New Jersey': { rep: 6.0, dem: 93.5 },
+                'New Mexico': { rep: 2.6, dem: 97.4 },
+                'North Carolina': { rep: 18.2, dem: 81.8 },
+                'Ohio': { rep: 48.3, dem: 51.7 },
+                'Oklahoma': { rep: 95.8, dem: 4.1 },
+                'Oregon': { rep: 5.5, dem: 94.2 },
+                'Rhode Island': { rep: 5.3, dem: 94.2 },
+                'South Carolina': { rep: 87.0, dem: 13.0 },
+                'South Dakota': { rep: 94.2, dem: 5.5 },
+                'Tennessee': { rep: 93.2, dem: 6.7 },
+                'Texas': { rep: 55.9, dem: 43.8 },
+                'Virginia': { rep: 5.4, dem: 93.8 },
+                'West Virginia': { rep: 94.0, dem: 5.2 },
+                'Wyoming': { rep: 94.8, dem: 4.5 }
             }
-        };
+        }
+        // END_BETTING_DATA
+    };
 
-        Chart.register(updateLinesPlugin);
-        
-        // Initialize chart
-        const ctx = document.getElementById('oddsChart').getContext('2d');
-        
-        function updateChart(source) {
-            const data = dataSources[source];
-            const isJack = source === 'jack';
+    // ── PRECOMPUTE ───────────────────────────────────────────────────────────
 
-            const annotationLines = isJack ? ['2026-03-10', '2026-03-13'] : [];
+    function linearInterp(srcDates, srcVals, d) {
+        const t  = new Date(d).getTime();
+        const ts = srcDates.map(x => new Date(x).getTime());
+        if (t <= ts[0]) return srcVals[0];
+        if (t >= ts[ts.length-1]) return srcVals[ts.length-1];
+        for (let i = 0; i < ts.length-1; i++) {
+            if (t >= ts[i] && t <= ts[i+1]) {
+                const a = (t-ts[i])/(ts[i+1]-ts[i]);
+                return +(srcVals[i] + a*(srcVals[i+1]-srcVals[i])).toFixed(2);
+            }
+        }
+        return srcVals[srcVals.length-1];
+    }
 
-            if (chart) {
-                chart.data.labels = data.dates;
-                chart.data.datasets[0].data = data.republicanOdds;
-                chart.data.datasets[1].data = data.democraticOdds;
-                chart.data.datasets[2].data = data.hungOdds || [];
-                chart.options.plugins.updateLines.lines = annotationLines;
-                chart.options.plugins.updateLines.visible = isJack && showAnnotations;
-                chart.update();
-            } else {
-                chart = new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.dates,
-                        datasets: [{
-                            label: 'Republican',
-                            data: data.republicanOdds,
-                            borderColor: '#dc2626',
-                            backgroundColor: 'transparent',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#dc2626',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2
-                        }, {
-                            label: 'Democratic',
-                            data: data.democraticOdds,
-                            borderColor: '#2563eb',
-                            backgroundColor: 'transparent',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#2563eb',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2
-                        }, {
-                            label: 'Hung Senate',
-                            data: data.hungOdds,
-                            borderColor: '#6b7280',
-                            backgroundColor: 'transparent',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            pointRadius: 0,
-                            pointHoverRadius: 6,
-                            pointBackgroundColor: '#6b7280',
-                            pointBorderColor: '#fff',
-                            pointBorderWidth: 2
-                        }]
+    const allDates   = [...new Set([...dataSources.betting.dates,...dataSources.jack.dates])].sort();
+    const jackStart  = new Date('2025-09-14').getTime();
+    const jackHiEnd  = new Date('2026-03-10').getTime();
+
+    function jackSolid(d, vals) {
+        const t = new Date(d).getTime();
+        if (t < jackStart) return null;
+        if (t > jackStart && t < jackHiEnd) return null;
+        return linearInterp(dataSources.jack.dates, vals, d);
+    }
+
+    dataSources.jack._cd   = allDates;
+    dataSources.jack._cr   = allDates.map(d => jackSolid(d, dataSources.jack.republicanOdds));
+    dataSources.jack._cd2  = allDates.map(d => jackSolid(d, dataSources.jack.democraticOdds));
+    dataSources.jack._ch   = allDates.map(d => jackSolid(d, dataSources.jack.hungOdds));
+    dataSources.jack._hr   = allDates.map(d => { const t=new Date(d).getTime(); return (t<jackStart||t>jackHiEnd)?null:linearInterp(dataSources.jack.dates,dataSources.jack.republicanOdds,d); });
+    dataSources.jack._hd   = allDates.map(d => { const t=new Date(d).getTime(); return (t<jackStart||t>jackHiEnd)?null:linearInterp(dataSources.jack.dates,dataSources.jack.democraticOdds,d); });
+
+    const nullArr = allDates.map(()=>null);
+    dataSources.betting._cd  = allDates;
+    dataSources.betting._cr  = allDates.map(d => linearInterp(dataSources.betting.dates,dataSources.betting.republicanOdds,d));
+    dataSources.betting._cd2 = allDates.map(d => linearInterp(dataSources.betting.dates,dataSources.betting.democraticOdds,d));
+    dataSources.betting._ch  = allDates.map(()=>0);
+    dataSources.betting._hr  = nullArr;
+    dataSources.betting._hd  = nullArr;
+
+    // ── STATE ────────────────────────────────────────────────────────────────
+
+    let currentSource  = 'jack';
+    let chart          = null;
+    let showAnnotations = true;
+    let animationFrame  = null;
+
+    function getStateColor(rep) {
+        if (rep === undefined) return '#e5e7eb';
+        if (rep >= 80) return '#dc2626';
+        if (rep >= 60) return '#f87171';
+        if (rep >= 40) return '#c084fc';
+        if (rep >= 20) return '#60a5fa';
+        return '#1d4ed8';
+    }
+
+    // ── PLUGINS ──────────────────────────────────────────────────────────────
+
+    const updateLinesPlugin = {
+        id: 'updateLines',
+        afterDraw(c,_,opts) {
+            if (!opts.lines || !opts.visible) return;
+            const {ctx,scales}=c;
+            opts.lines.forEach(ds=>{
+                const x=scales.x.getPixelForValue(new Date(ds));
+                const y0=scales.y.getPixelForValue(scales.y.max);
+                const y1=scales.y.getPixelForValue(scales.y.min);
+                ctx.save(); ctx.beginPath(); ctx.setLineDash([3,4]);
+                ctx.strokeStyle='#d1d5db'; ctx.lineWidth=1;
+                ctx.moveTo(x,y0); ctx.lineTo(x,y1); ctx.stroke(); ctx.restore();
+            });
+        }
+    };
+
+    const hiatusPlugin = {
+        id: 'hiatusShade',
+        beforeDatasetsDraw(c,_,opts) {
+            if (!opts.visible) return;
+            const {ctx,scales}=c;
+            const x1=scales.x.getPixelForValue(new Date('2025-09-14'))+12;
+            const x2=scales.x.getPixelForValue(new Date('2026-03-10'))-12;
+            const y0=scales.y.getPixelForValue(scales.y.max);
+            const y1=scales.y.getPixelForValue(scales.y.min);
+            ctx.save(); ctx.fillStyle='rgba(0,0,0,0.04)'; ctx.fillRect(x1,y0,x2-x1,y1-y0); ctx.restore();
+        },
+        afterDatasetsDraw(c,_,opts) {
+            if (!opts.visible) return;
+            const {ctx,scales}=c;
+            const x1=scales.x.getPixelForValue(new Date('2025-09-14'))+12;
+            const x2=scales.x.getPixelForValue(new Date('2026-03-10'))-12;
+            const y1=scales.y.getPixelForValue(scales.y.min);
+            ctx.save(); ctx.font='italic 11px Inter,sans-serif'; ctx.fillStyle='#9ca3af';
+            ctx.textAlign='center'; ctx.fillText('Forecasting hiatus',(x1+x2)/2,y1-10); ctx.restore();
+        }
+    };
+
+    Chart.register(updateLinesPlugin, hiatusPlugin);
+
+    // ── ANIMATION ────────────────────────────────────────────────────────────
+
+    function animateTransition(snaps, targets, onMid) {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        const FALL=300, RISE=520;
+        const eI = t=>t*t;
+        const eO = t=>{ const c=1.2; return 1+(c+1)*Math.pow(t-1,3)+c*Math.pow(t-1,2); };
+        let fs=null;
+        function fall(ts) {
+            if (!fs) fs=ts;
+            const t=Math.min((ts-fs)/FALL,1), e=eI(t);
+            snaps.forEach((s,i)=>{ chart.data.datasets[i].data=s.map(v=>v===null?null:v*(1-e)); });
+            chart.update('none');
+            if (t<1) { animationFrame=requestAnimationFrame(fall); }
+            else {
+                onMid();
+                targets.forEach((td,i)=>{ chart.data.datasets[i].data=td.map(v=>v===null?null:0); });
+                chart.update('none');
+                let rs=null;
+                function rise(ts) {
+                    if (!rs) rs=ts;
+                    const t=Math.min((ts-rs)/RISE,1), e=Math.max(0,eO(t));
+                    targets.forEach((td,i)=>{ chart.data.datasets[i].data=td.map(v=>v===null?null:v*e); });
+                    chart.update('none');
+                    if (t<1) { animationFrame=requestAnimationFrame(rise); }
+                    else { targets.forEach((td,i)=>{ chart.data.datasets[i].data=[...td]; }); chart.update('none'); animationFrame=null; }
+                }
+                animationFrame=requestAnimationFrame(rise);
+            }
+        }
+        animationFrame=requestAnimationFrame(fall);
+    }
+
+    // ── CHART ────────────────────────────────────────────────────────────────
+
+    const chartCtx = document.getElementById('oddsChart').getContext('2d');
+
+    function updateChart(source) {
+        const d=dataSources[source], isJ=source==='jack';
+        const al=isJ?['2026-03-10','2026-03-13','2026-03-16']:[];
+        if (chart) {
+            const sn=[0,1,2,3,4].map(i=>[...chart.data.datasets[i].data]);
+            const tg=[d._cr,d._cd2,d._ch,d._hr,d._hd];
+            animateTransition(sn,tg,()=>{
+                chart.data.labels=d._cd;
+                chart.options.plugins.updateLines.lines=al;
+                chart.options.plugins.updateLines.visible=isJ&&showAnnotations;
+                chart.options.plugins.hiatusShade.visible=isJ;
+                if (isJ) chart.options.scales.x.min='2025-09-14';
+                else delete chart.options.scales.x.min;
+            });
+        } else {
+            chart = new Chart(chartCtx, {
+                type:'line', data:{ labels:d._cd, datasets:[
+                    { label:'Republican', data:d._cr, borderColor:'#dc2626', backgroundColor:'rgba(220,38,38,0.06)', fill:'origin', borderWidth:2, tension:0.1, pointRadius:0, pointHoverRadius:5, pointBackgroundColor:'#dc2626', pointBorderColor:'#fff', pointBorderWidth:2 },
+                    { label:'Democratic', data:d._cd2, borderColor:'#1d4ed8', backgroundColor:'rgba(29,78,216,0.05)', fill:'origin', borderWidth:2, tension:0.1, pointRadius:0, pointHoverRadius:5, pointBackgroundColor:'#1d4ed8', pointBorderColor:'#fff', pointBorderWidth:2 },
+                    { label:'Hung Senate', data:d._ch, borderColor:'#9ca3af', backgroundColor:'transparent', borderWidth:1.5, tension:0.1, pointRadius:0, pointHoverRadius:4, pointBackgroundColor:'#9ca3af', pointBorderColor:'#fff', pointBorderWidth:2 },
+                    { label:'_hr', data:d._hr, borderColor:'#dc2626', backgroundColor:'transparent', borderWidth:1.5, borderDash:[5,4], tension:0.1, pointRadius:0, pointHoverRadius:0 },
+                    { label:'_hd', data:d._hd, borderColor:'#1d4ed8', backgroundColor:'transparent', borderWidth:1.5, borderDash:[5,4], tension:0.1, pointRadius:0, pointHoverRadius:0 }
+                ]},
+                options:{ animation:false, responsive:true, maintainAspectRatio:false,
+                    interaction:{ mode:'index', intersect:false },
+                    plugins:{
+                        legend:{ display:false },
+                        tooltip:{ backgroundColor:'#fff', borderColor:'#e5e7eb', borderWidth:1, titleColor:'#111827', bodyColor:'#6b7280', padding:12, titleFont:{size:13,weight:'600',family:'Inter'}, bodyFont:{size:12,family:'Inter'},
+                            filter:item=>!item.dataset.label.startsWith('_'),
+                            callbacks:{ label:c=>{ if(c.parsed.y==null) return undefined; return '  '+c.dataset.label+': '+c.parsed.y.toFixed(1)+'%'; } }
+                        },
+                        updateLines:{ lines:al, visible:isJ&&showAnnotations },
+                        hiatusShade:{ visible:isJ }
                     },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        interaction: {
-                            mode: 'index',
-                            intersect: false,
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            },
-                            tooltip: {
-                                backgroundColor: 'rgba(0, 0, 0, 0.9)',
-                                padding: 12,
-                                titleFont: {
-                                    size: 14
-                                },
-                                bodyFont: {
-                                    size: 13
-                                },
-                                callbacks: {
-                                    label: function(context) {
-                                        return context.dataset.label + ': ' + context.parsed.y + '%';
-                                    }
-                                }
-                            },
-                            updateLines: {
-                                lines: annotationLines,
-                                visible: isJack && showAnnotations
-                            }
-                        },
-                        scales: {
-                            y: {
-                                min: 0,
-                                max: 100,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value + '%';
-                                    },
-                                    font: {
-                                        size: 14
-                                    },
-                                    color: '#666'
-                                },
-                                grid: {
-                                    color: '#e5e5e5'
-                                }
-                            },
-                            x: {
-                                type: 'time',
-                                time: {
-                                    tooltipFormat: 'MMM d, yyyy',
-                                    displayFormats: {
-                                        day: 'MMM d',
-                                        week: 'MMM d',
-                                        month: 'MMM yyyy'
-                                    }
-                                },
-                                ticks: {
-                                    font: {
-                                        size: 14
-                                    },
-                                    color: '#666'
-                                },
-                                grid: {
-                                    display: false
-                                }
-                            }
-                        }
+                    scales:{
+                        y:{ min:0, max:100, ticks:{ callback:v=>v+'%', color:'#9ca3af', font:{size:12,family:'Inter'}, maxTicksLimit:6 }, grid:{ color:'#f3f4f6', drawBorder:false } },
+                        x:{ type:'time', min:'2025-09-14', time:{ tooltipFormat:'MMM d, yyyy', displayFormats:{ day:'MMM d', week:'MMM d', month:'MMM yyyy' } }, ticks:{ color:'#9ca3af', font:{size:12,family:'Inter'}, maxTicksLimit:8 }, grid:{ display:false, drawBorder:false } }
                     }
-                });
-            }
-        }
-        
-        function getStateColor(repOdds) {
-            if (repOdds === undefined) return '#999';
-            if (repOdds >= 80) return '#dc2626';
-            if (repOdds >= 60) return '#f87171';
-            if (repOdds >= 40) return '#c084fc';
-            if (repOdds >= 20) return '#60a5fa';
-            return '#2563eb';
-        }
-        
-        function updateStateBar(source) {
-            const stateOdds = dataSources[source].stateOdds;
-            const stateBar = document.getElementById('stateBar');
-            const tooltip = d3.select(".tooltip");
-            
-            stateBar.innerHTML = '';
-            
-            const stateArray = Object.entries(stateOdds).map(([state, odds]) => ({
-                name: state,
-                ...odds
-            })).sort((a, b) => b.dem - a.dem);
-            
-            const notUpForElectionLeft = 34;
-            const notUpForElectionRight = 31;
-            const totalSeats = 100;
-            
-            const leftSection = document.createElement('div');
-            leftSection.style.width = (notUpForElectionLeft / totalSeats * 100) + '%';
-            leftSection.style.background = 'repeating-linear-gradient(45deg, #60a5fa, #60a5fa 10px, #93c5fd 10px, #93c5fd 20px)';
-            leftSection.style.opacity = '0.3';
-            stateBar.appendChild(leftSection);
-            
-            stateArray.forEach((state) => {
-                const segment = document.createElement('div');
-                segment.className = 'state-segment';
-                segment.style.width = (1 / totalSeats * 100) + '%';
-                segment.style.background = getStateColor(state.rep);
-                segment.dataset.stateName = state.name;
-                
-                segment.addEventListener('mouseenter', function(event) {
-                    tooltip
-                        .html(`<strong>${state.name}</strong><br>
-                            Republican: ${state.rep}%<br>
-                            Democrat: ${state.dem}%` + (state.other > 0 ? `<br>Other: ${state.other}%` : ''))
-                        .style("left", (event.pageX + 10) + "px")
-                        .style("top", (event.pageY - 28) + "px")
-                        .classed("show", true);
-                    
-                    d3.selectAll('.state')
-                        .classed('highlight', function(d) {
-                            return d.properties.name === state.name;
-                        });
-                });
-                
-                segment.addEventListener('mouseleave', function() {
-                    tooltip.classed("show", false);
-                    d3.selectAll('.state').classed('highlight', false);
-                });
-                
-                stateBar.appendChild(segment);
-            });
-            
-            const rightSection = document.createElement('div');
-            rightSection.style.width = (notUpForElectionRight / totalSeats * 100) + '%';
-            rightSection.style.background = 'repeating-linear-gradient(45deg, #f87171, #f87171 10px, #fca5a5 10px, #fca5a5 20px)';
-            rightSection.style.opacity = '0.3';
-            stateBar.appendChild(rightSection);
-
-            const majorityLine = document.getElementById('majorityLine');
-            majorityLine.style.left = '50%';
-        }
-        
-        function updateMap(source) {
-            const stateOdds = dataSources[source].stateOdds;
-            
-            d3.selectAll('.state')
-                .transition()
-                .duration(300)
-                .attr("fill", function(d) {
-                    const stateName = d.properties.name;
-                    const odds = stateOdds[stateName];
-                    if (odds) {
-                        return getStateColor(odds.rep);
-                    }
-                    return '#ccc';
-                });
-        }
-
-        function updateAnnotationNoteVisibility(source) {
-            const note = document.getElementById('annotationNote');
-            note.style.display = source === 'jack' ? 'flex' : 'none';
-        }
-        
-        function updateDisplay(source) {
-            const data = dataSources[source];
-            
-            document.getElementById('forecastAuthor').textContent = data.author;
-            document.getElementById('forecastAuthorMobile').textContent = data.author;
-            
-            document.getElementById('currentOddsDesktop').textContent = data.currentOdds + '%';
-            document.getElementById('currentOddsMobile').textContent = data.currentOdds + '%';
-            
-            updateAnnotationNoteVisibility(source);
-            updateChart(source);
-            updateStateBar(source);
-            updateMap(source);
-        }
-
-        // Checkbox toggle for annotation lines
-        document.getElementById('showAnnotations').addEventListener('change', function() {
-            showAnnotations = this.checked;
-            if (chart) {
-                chart.options.plugins.updateLines.visible = showAnnotations;
-                chart.update();
-            }
-        });
-        
-        // Button event listeners
-        document.getElementById('jackForecast').addEventListener('click', function() {
-            if (currentSource !== 'jack') {
-                currentSource = 'jack';
-                document.getElementById('jackForecast').classList.add('active');
-                document.getElementById('bettingOdds').classList.remove('active');
-                updateDisplay('jack');
-            }
-        });
-        
-        document.getElementById('bettingOdds').addEventListener('click', function() {
-            if (currentSource !== 'betting') {
-                currentSource = 'betting';
-                document.getElementById('bettingOdds').classList.add('active');
-                document.getElementById('jackForecast').classList.remove('active');
-                updateDisplay('betting');
-            }
-        });
-        
-        // Map setup with responsive dimensions
-        function getMapDimensions() {
-            const container = document.getElementById('map-container');
-            const containerWidth = container.offsetWidth;
-            const isMobile = window.innerWidth <= 768;
-    
-            if (isMobile) {
-                return {
-                    width: Math.min(containerWidth - 40, 800),
-                    height: Math.min((containerWidth - 40) * 0.6, 480)
-                };
-            } else {
-                return {
-                    width: 960,
-                    height: 500
-                };
-            }
-        }
-        
-        function createMap() {
-            const dimensions = getMapDimensions();
-            const { width, height } = dimensions;
-            
-            d3.select("#map").selectAll("*").remove();
-            
-            const svg = d3.select("#map")
-                .attr("width", width)
-                .attr("height", height);
-            
-            const tooltip = d3.select(".tooltip");
-            const stateOdds = dataSources[currentSource].stateOdds;
-            
-            d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
-                const statePaths = topojson.feature(us, us.objects.states);
-                
-                const projection = d3.geoAlbersUsa()
-                    .scale(width * 1.125)
-                    .translate([width / 2, height / 2]);
-                
-                const path = d3.geoPath().projection(projection);
-                
-                svg.selectAll(".state")
-                    .data(statePaths.features)
-                    .enter().append("path")
-                    .attr("class", "state")
-                    .attr("d", path)
-                    .attr("fill", function(d) {
-                        const stateName = d.properties.name;
-                        const odds = stateOdds[stateName];
-                        if (odds) {
-                            return getStateColor(odds.rep);
-                        }
-                        return '#ccc';
-                    })
-                    .on("mouseover", function(event, d) {
-                        const stateName = d.properties.name;
-                        const odds = dataSources[currentSource].stateOdds[stateName];
-                        
-                        document.querySelectorAll('.state-segment').forEach(segment => {
-                            if (segment.dataset.stateName === stateName) {
-                                segment.classList.add('highlight');
-                            } else {
-                                segment.classList.remove('highlight');
-                            }
-                        });
-                        
-                        if (odds) {
-                            tooltip
-                                .html(`<strong>${stateName}</strong><br>
-                                    Republican: ${odds.rep}%<br>
-                                    Democrat: ${odds.dem}%` + (odds.other > 0 ? `<br>Other: ${odds.other}%` : ''))
-                                .style("left", (event.pageX + 10) + "px")
-                                .style("top", (event.pageY - 28) + "px")
-                                .classed("show", true);
-                        } else if (stateName) {
-                            tooltip
-                                .html(`<strong>${stateName}</strong><br>
-                                    No Senate race in 2026`)
-                                .style("left", (event.pageX + 10) + "px")
-                                .style("top", (event.pageY - 28) + "px")
-                                .classed("show", true);
-                        }
-                    })
-                    .on("mouseout", function() {
-                        tooltip.classed("show", false);
-                        document.querySelectorAll('.state-segment').forEach(segment => {
-                            segment.classList.remove('highlight');
-                        });
-                    });
+                }
             });
         }
-        
-        // Initialize
-        updateChart('jack');
-        updateStateBar('jack');
-        const majorityLine = document.getElementById('majorityLine');
-        majorityLine.style.left = '50%';
-        createMap();
-        
-        window.addEventListener('resize', function() {
-            clearTimeout(window.resizeTimeout);
-            window.resizeTimeout = setTimeout(createMap, 250);
+    }
+
+    // ── STATE BAR ────────────────────────────────────────────────────────────
+
+    function updateStateBar(source) {
+        const stateOdds = dataSources[source].stateOdds;
+        const stateBar  = document.getElementById('stateBar');
+        const tt        = d3.select('.tt');
+
+        stateBar.innerHTML = '';
+
+        const stateArray = Object.entries(stateOdds).map(([state, odds]) => ({
+            name: state, rep: odds.rep, dem: odds.dem, other: odds.other || 0
+        })).sort((a, b) => b.dem - a.dem);
+
+        const totalSeats = 100, notUpLeft = 34, notUpRight = 31;
+
+        const leftSection = document.createElement('div');
+        leftSection.style.width      = (notUpLeft / totalSeats * 100) + '%';
+        leftSection.style.background = 'repeating-linear-gradient(45deg,#60a5fa,#60a5fa 10px,#93c5fd 10px,#93c5fd 20px)';
+        leftSection.style.opacity    = '0.3';
+        stateBar.appendChild(leftSection);
+
+        stateArray.forEach(state => {
+            const segment            = document.createElement('div');
+            segment.className        = 'state-segment';
+            segment.style.width      = (1 / totalSeats * 100) + '%';
+            segment.style.background = getStateColor(state.rep);
+            segment.dataset.sn       = state.name;
+
+            segment.addEventListener('mouseenter', function(event) {
+                tt.html(`<strong>${state.name}</strong><br>Republican: ${state.rep}%<br>Democrat: ${state.dem}%` + (state.other > 0 ? `<br>Other: ${state.other}%` : ''))
+                  .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 36) + 'px')
+                  .classed('show', true);
+                d3.selectAll('.state').classed('highlight', s => s.properties.name === state.name);
+            });
+            segment.addEventListener('mouseleave', function() {
+                tt.classed('show', false);
+                d3.selectAll('.state').classed('highlight', false);
+            });
+
+            stateBar.appendChild(segment);
         });
-    </script>
+
+        const rightSection = document.createElement('div');
+        rightSection.style.width      = (notUpRight / totalSeats * 100) + '%';
+        rightSection.style.background = 'repeating-linear-gradient(45deg,#f87171,#f87171 10px,#fca5a5 10px,#fca5a5 20px)';
+        rightSection.style.opacity    = '0.3';
+        stateBar.appendChild(rightSection);
+
+        document.getElementById('majorityLine').style.left = '50%';
+    }
+
+    // ── MAP ──────────────────────────────────────────────────────────────────
+
+    function updateMap(source) {
+        const odds = dataSources[source].stateOdds;
+        d3.selectAll('.state').transition().duration(280)
+            .attr('fill', d => { const o=odds[d.properties.name]; return o?getStateColor(o.rep):'#e5e7eb'; });
+    }
+
+    function createMap() {
+        const wrap  = document.getElementById('map').closest('.map-wrap');
+        const W     = wrap.offsetWidth;
+        const H     = Math.round(W * 0.52);
+        d3.select('#map').selectAll('*').remove();
+        const svg = d3.select('#map').attr('width',W).attr('height',H);
+        const tt  = d3.select('.tt');
+        const proj = d3.geoAlbersUsa().scale(W*1.13).translate([W/2,H/2]);
+        const path = d3.geoPath().projection(proj);
+
+        d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(us => {
+            svg.selectAll('.state')
+                .data(topojson.feature(us,us.objects.states).features)
+                .enter().append('path').attr('class','state').attr('d',path)
+                .attr('fill', d => { const o=dataSources[currentSource].stateOdds[d.properties.name]; return o?getStateColor(o.rep):'#e5e7eb'; })
+                .on('mouseover',(event,d)=>{
+                    const name=d.properties.name, o=dataSources[currentSource].stateOdds[name];
+                    document.querySelectorAll('.state-segment').forEach(s=>s.classList.toggle('highlight',s.dataset.sn===name));
+                    d3.selectAll('#dotPlot circle').each(function(_,i){ /* dots don't have easy class, skip */ });
+                    tt.html(o?`<strong>${name}</strong><br>Republican: ${o.rep}%<br>Democrat: ${o.dem}%`+(o.other>0?`<br>Other: ${o.other}%`:''):`<strong>${name}</strong><br>No Senate race in 2026`)
+                      .style('left',(event.pageX+12)+'px').style('top',(event.pageY-36)+'px').classed('show',true);
+                })
+                .on('mouseout',()=>{ tt.classed('show',false); });
+        });
+    }
+
+    // ── DISPLAY UPDATE ───────────────────────────────────────────────────────
+
+    function metaphorForOdds(pct) {
+        if (pct <  2)  return '(about the odds of hitting a home run)';
+        if (pct <  5)  return '(about the odds of a full house in Texas Hold \'em)';
+        if (pct <  8)  return '(about the odds of rain on a random day in Vegas)';
+        if (pct < 15)  return '(about the odds of landing on tails thrice in a row)';
+        if (pct < 25)  return '(about the odds of a two pair in Texas Hold \'em)';
+        if (pct < 35)  return '(about the odds of an MLB player getting a hit)';
+        if (pct < 45)  return '(about the odds of flipping two heads in four flips)';
+        if (pct < 55)  return '(about the odds of a coin landing on heads)';
+        if (pct < 65)  return '(about the odds of drawing a number card)';
+        if (pct < 75)  return '(about the odds of Djokovic landing his first serve)';
+        if (pct < 85)  return '(about the odds of an NBA player making a free throw)';
+        if (pct < 92)  return '(about the odds of tails at least once in three flips)';
+        if (pct < 95)  return '(about the odds of surviving year one after heart bypass)';
+        if (pct < 97)  return '(about the odds of the dealer not getting a blackjack)';
+        return '(about the odds of getting rejected by QJE)';
+    }
+
+    let heroAnimFrame = null;
+    let heroCurrentRep  = null;
+    let heroCurrentDem  = null;
+    let heroCurrentHung = null;
+
+    function updateHero(source, animate) {
+        const d = dataSources[source];
+        const targetRep  = d.currentOdds;
+        const targetDem  = d.currentDemOdds;
+        const targetHung = d.currentHungOdds || 0;
+
+        document.getElementById('heroId').textContent       = 'Updated Mar 16, 2026';
+        document.getElementById('topbarMeta').textContent   = d.author;
+        document.getElementById('heroHungRow').style.display = targetHung > 0 ? '' : 'none';
+
+        if (!animate || heroCurrentRep === null) {
+            heroCurrentRep  = targetRep;
+            heroCurrentDem  = targetDem;
+            heroCurrentHung = targetHung;
+            document.getElementById('heroRepPct').textContent  = targetRep  + '%';
+            document.getElementById('heroDemPct').textContent  = targetDem  + '%';
+            document.getElementById('heroHungPct').textContent = targetHung + '%';
+            document.getElementById('heroRepMeta').textContent  = metaphorForOdds(targetRep);
+            document.getElementById('heroDemMeta').textContent  = metaphorForOdds(targetDem);
+            return;
+        }
+
+        if (heroAnimFrame) cancelAnimationFrame(heroAnimFrame);
+
+        let skipFrame = false;
+        function step() {
+            skipFrame = !skipFrame;
+            if (skipFrame) { heroAnimFrame = requestAnimationFrame(step); return; }
+
+            let done = true;
+            const STEP = 0.1;
+
+            function tick(cur, tgt) {
+                if (cur === tgt) return cur;
+                done = false;
+                const diff = tgt - cur;
+                return Math.round((cur + Math.sign(diff) * Math.min(STEP, Math.abs(diff))) * 10) / 10;
+            }
+
+            heroCurrentRep  = tick(heroCurrentRep,  targetRep);
+            heroCurrentDem  = tick(heroCurrentDem,  targetDem);
+            heroCurrentHung = tick(heroCurrentHung, targetHung);
+
+            document.getElementById('heroRepPct').textContent  = heroCurrentRep  + '%';
+            document.getElementById('heroDemPct').textContent  = heroCurrentDem  + '%';
+            document.getElementById('heroHungPct').textContent = heroCurrentHung + '%';
+            document.getElementById('heroRepMeta').textContent  = metaphorForOdds(heroCurrentRep);
+            document.getElementById('heroDemMeta').textContent  = metaphorForOdds(heroCurrentDem);
+
+            if (!done) heroAnimFrame = requestAnimationFrame(step);
+            else heroAnimFrame = null;
+        }
+
+        heroAnimFrame = requestAnimationFrame(step);
+    }
+
+    function updateDisplay(source, animateHero) {
+        const isJ = source === 'jack';
+        updateHero(source, animateHero);
+        document.getElementById('annotWrap').style.display    = isJ ? 'flex' : 'none';
+        document.getElementById('hungLegend').style.display   = isJ ? 'flex' : 'none';
+        updateChart(source);
+        updateStateBar(source);
+        updateMap(source);
+    }
+
+    // ── EVENTS ───────────────────────────────────────────────────────────────
+
+    document.getElementById('showAnnotations').addEventListener('change', function() {
+        showAnnotations = this.checked;
+        if (chart) { chart.options.plugins.updateLines.visible = showAnnotations; chart.update('none'); }
+    });
+
+    document.getElementById('jackForecast').addEventListener('click', function() {
+        if (currentSource !== 'jack') {
+            currentSource = 'jack';
+            this.classList.add('active');
+            document.getElementById('bettingOdds').classList.remove('active');
+            updateDisplay('jack', true);
+        }
+    });
+
+    document.getElementById('bettingOdds').addEventListener('click', function() {
+        if (currentSource !== 'betting') {
+            currentSource = 'betting';
+            this.classList.add('active');
+            document.getElementById('jackForecast').classList.remove('active');
+            updateDisplay('betting', true);
+        }
+    });
+
+    window.addEventListener('resize', () => {
+        clearTimeout(window.rt);
+        window.rt = setTimeout(() => { createMap(); updateStateBar(currentSource); }, 250);
+    });
+
+    // ── INIT ─────────────────────────────────────────────────────────────────
+
+    createMap();
+    updateDisplay('jack');
+
+    // ── PAGE NAVIGATION ──────────────────────────────────────────────────────
+
+    // Outgoing: flag slide direction for house page
+    document.getElementById('toHouseLink').addEventListener('click', function(e) {
+        e.preventDefault();
+        sessionStorage.setItem('slideFrom', 'left');
+        window.location.href = this.href;
+    });
+
+    // Incoming: slide in if returning from house page
+    (function() {
+        var dir = sessionStorage.getItem('slideFrom');
+        if (dir === 'right') {
+            sessionStorage.removeItem('slideFrom');
+            document.body.classList.add('slide-in-from-left');
+        }
+    })();
+</script>
 </body>
 </html>
