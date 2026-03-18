@@ -389,11 +389,13 @@
             .topbar-meta { display: none; }
             .page { padding: 0 16px 72px; }
 
-            .top-band { flex-wrap: wrap; padding: 28px 12px 0; }
+            .top-band { flex-wrap: wrap; padding: 48px 12px 0; }
             .side-stat { flex: 1; padding: 0 8px; }
             .bar-middle { flex-basis: 100%; padding-top: 44px; }
 
             .chart-area { height: 240px; }
+
+            .majority-label { top: auto; bottom: calc(100% + 4px); }
         }
 
         @media (max-width: 420px) {
@@ -443,6 +445,18 @@
         @media (max-width: 680px) {
             .map-with-nav { flex-direction: column; }
             .map-nav-aside { width: 100%; text-align: left; }
+            #toHouseLink {
+                top: 52px;
+                left: 0;
+                right: 0;
+                width: 100%;
+                text-align: center;
+                background: rgba(255,255,255,0.95);
+                padding: 8px 16px;
+                border-bottom: 1px solid var(--rule);
+                transform: none;
+                font-size: 16px;
+            }
         }
 
         /* ── SLIDE TRANSITIONS ───────────────────────────── */
