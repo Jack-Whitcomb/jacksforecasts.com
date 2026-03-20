@@ -207,11 +207,11 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 700;
             letter-spacing: 0.15em;
             text-transform: uppercase;
-            color: var(--ink-2);
+            color: var(--ink);
             white-space: nowrap;
         }
 
@@ -436,10 +436,9 @@
         }
         .page-nav-link:hover { color: var(--ink); text-decoration: underline; }
         #toHouseLink {
-            position: fixed;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            position: sticky;
+            top: 68px;
+            align-self: flex-start;
         }
 
         @media (max-width: 680px) {
@@ -459,6 +458,60 @@
             }
         }
 
+        /* ── SECTION NAV ─────────────────────────────────── */
+
+        .section-nav {
+            position: fixed;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 140px;
+        }
+
+        .snav-item {
+            font-size: 13.5px;
+            color: var(--ink-2);
+            text-decoration: none;
+            font-weight: 400;
+            line-height: 1.35;
+            cursor: pointer;
+            transition: color 0.15s;
+        }
+
+        .snav-item:hover { color: var(--ink); }
+
+        .snav-item.active {
+            font-weight: 700;
+            color: var(--ink);
+        }
+
+        @media (max-width: 980px) {
+            .section-nav { display: none; }
+        }
+
+        /* ── METHODOLOGY SECTION ────────────────────────── */
+
+        #section-methodology p {
+            font-size: 15px;
+            line-height: 1.75;
+            color: var(--ink);
+            margin-bottom: 1.2em;
+            max-width: 680px;
+        }
+
+        #section-methodology p:last-child { margin-bottom: 0; }
+
+        .coin-chart-wrap {
+            position: relative;
+            height: 220px;
+            margin: 8px 0 32px;
+            max-width: 680px;
+        }
+
         /* ── SLIDE TRANSITIONS ───────────────────────────── */
 
         @keyframes slideInFromRight {
@@ -475,9 +528,16 @@
 </head>
 <body>
 
+<!-- SECTION INDICATOR -->
+<nav class="section-nav">
+    <a class="snav-item" data-section="section-race-odds">Race odds</a>
+    <a class="snav-item" data-section="section-probability">Probability over time</a>
+    <a class="snav-item" data-section="section-methodology">What do these probabilities mean? Can you trust me?</a>
+</nav>
+
 <!-- STICKY TOPBAR -->
 <div class="topbar">
-    <span class="topbar-title">2026 U.S. Senate Majority Forecast</span>
+    <span class="topbar-title">2026 U.S. Senate Forecast</span>
     <div class="topbar-right">
         <span class="topbar-meta" id="topbarMeta"></span>
         <div class="tabs">
@@ -528,7 +588,7 @@
     <div class="top-band-foot"><span id="heroId"></span></div>
 
     <!-- SECTION: MAP -->
-    <div class="section">
+    <div class="section" id="section-race-odds">
         <div class="sec-head">
             <span class="sec-title">Race odds by state</span>
         </div>
@@ -550,7 +610,7 @@
     </div>
 
     <!-- SECTION: PROBABILITY OVER TIME -->
-    <div class="section">
+    <div class="section" id="section-probability">
         <div class="sec-head">
             <div style="display:flex; align-items:center; gap:20px; flex-wrap:wrap">
                 <span class="sec-title">Probability over time</span>
@@ -568,6 +628,28 @@
         <div class="chart-area">
             <canvas id="oddsChart"></canvas>
         </div>
+    </div>
+
+
+    <!-- SECTION: WHAT DO THESE PROBABILITIES MEAN? -->
+    <div class="section" id="section-methodology">
+        <div class="sec-head">
+            <span class="sec-title">What do these probabilities mean? Can you trust me?</span>
+        </div>
+        <p>We're used to thinking about probabilities like 50% for a coinflip. If you keep flipping a coin, it comes up heads about half the time, just as the probability says. You can see this happening in the graph below, where the actual share of coinflips that come up heads keeps getting closer and closer to the supposed probability.</p>
+        <div class="coin-chart-wrap"><canvas id="coinChart"></canvas></div>
+
+		<p>The probabilities featured here seem different, however. What could a 50% probability mean for something that happens just once? This issue is controversial, but because this is my own forecast, I can provide you with the intended interpretation of my own odds.</p>
+		
+		<p>When my forecast says something has a certain x% chance of happening, the intended meaning is that after a sufficiently large number of forecasts have been made, close to x% of all events given an x% chance of occurring will have occurred. If you want more precision, I believe that after I have made 100 forecasts with an x% chance, plus or minus 5%, x% ± 10% of them will have truly occurred.</p>
+		
+		<p>To provide an example, I believe the Democrats have about a 90% chance of winning the Oregon US Senate race. Once I have made 100 predictions yielding a probability between 85% and 95%, I believe somewhere between 80% and 100% of them will have actually occurred.</p>
+		
+		<p>Unlike normal probabilities, these forecasted odds are claims about a class of events that the event in question belongs to, not claims about the natural frequency at which a random event like a coinflip occurs. Forecasted odds can be considered wrong when it takes "too long" for the actual frequency to converge on the forecasted frequency. I might claim 100 times that various events have 70% odds, and if by that point just 50% of them actually happened, we could say my forecasts were incorrect or "poorly-calibrated."</p>
+		
+		<p>I do not have a long record of forecasting, but the forecasts I have made so far have been very good. In 2020, I forecasted that Republicans would win about 48 Senate seats, and they went on to win 50, losing control of the chamber. The average probability I gave to the Republican in each race was about 52%, and they actually won 57% - thus, the empirical frequency was already converging on the claimed one.</p>
+		
+		<p>In 2024, I forecasted the presidential race between Kamala Harris and Donald Trump. While the overall odds my forecast gave provided a slight edge to Harris, this was essentially the product of random chance, since they were close to 50/50 and I was relying on random simulations. The forecast I provided using my own judgment, however, was almost perfect: I judged that Trump would win, and only failed to predict that Harris would win Nebraska's 2nd district. <a href="https://jackonomics.substack.com/p/final-forecast-trump-but-the-model" target="_blank" rel="noopener">The post in which I made this forecast can be viewed here.</a> Sadly, my 2020 forecast was an unpublished school project, so you will have to take my word for it. <a href="https://docs.google.com/spreadsheets/d/1i2tYpM8iRrbaqv0hqmBx_ojf1Gjc-GCIK8tDmNDA0jA/edit?usp=sharing" target="_blank" rel="noopener">The spreadsheet containing the forecast is here,</a> but of course, a devilish forecaster could fabricate such a thing and make it appear older than it really is.</p>
     </div>
 
 </div>
@@ -666,22 +748,22 @@
                 'Maine': { rep: 28.2, dem: 71.8 },
                 'Massachusetts': { rep: 3.7, dem: 95.8 },
                 'Michigan': { rep: 19.7, dem: 80.3 },
-                'Minnesota': { rep: 10.5, dem: 89.5 },
+                'Minnesota': { rep: 9.9, dem: 90.1 },
                 'Mississippi': { rep: 92.5, dem: 7.5 },
-                'Montana': { rep: 84.1, dem: 8.4 },
-                'Nebraska': { rep: 84.6, dem: 2.4 },
-                'New Hampshire': { rep: 14.1, dem: 85.9 },
+                'Montana': { rep: 84.0, dem: 8.0 },
+                'Nebraska': { rep: 84.2, dem: 2.8 },
+                'New Hampshire': { rep: 13.9, dem: 86.1 },
                 'New Jersey': { rep: 5.8, dem: 93.7 },
                 'New Mexico': { rep: 2.4, dem: 97.3 },
                 'North Carolina': { rep: 19.4, dem: 80.6 },
                 'Ohio': { rep: 47.8, dem: 52.2 },
-                'Oklahoma': { rep: 95.7, dem: 4.0 },
+                'Oklahoma': { rep: 95.6, dem: 4.0 },
                 'Oregon': { rep: 5.5, dem: 94.2 },
                 'Rhode Island': { rep: 5.3, dem: 94.2 },
                 'South Carolina': { rep: 85.5, dem: 14.5 },
                 'South Dakota': { rep: 94.5, dem: 5.2 },
                 'Tennessee': { rep: 93.1, dem: 6.8 },
-                'Texas': { rep: 56.9, dem: 43.1 },
+                'Texas': { rep: 56.7, dem: 43.3 },
                 'Virginia': { rep: 5.4, dem: 93.8 },
                 'West Virginia': { rep: 94.2, dem: 5.2 },
                 'Wyoming': { rep: 94.8, dem: 4.8 }
@@ -1097,6 +1179,133 @@
             sessionStorage.removeItem('slideFrom');
             document.body.classList.add('slide-in-from-left');
         }
+    })();
+
+    // ── SECTION NAV SCROLLSPY ─────────────────────────────────────────────────
+
+    (function() {
+        const navItems = document.querySelectorAll('.snav-item');
+        const sectionIds = ['section-race-odds', 'section-probability', 'section-methodology'];
+
+        function updateNav() {
+            const scrollY = window.scrollY + 120; // account for topbar + buffer
+            let active = sectionIds[0];
+
+            sectionIds.forEach(function(id) {
+                const el = document.getElementById(id);
+                if (el && el.getBoundingClientRect().top + window.scrollY <= scrollY) {
+                    active = id;
+                }
+            });
+
+            navItems.forEach(function(item) {
+                item.classList.toggle('active', item.dataset.section === active);
+            });
+        }
+
+        navItems.forEach(function(item) {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.getElementById(item.dataset.section);
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            });
+        });
+
+        window.addEventListener('scroll', updateNav, { passive: true });
+        updateNav();
+    })();
+
+    // ── COIN FLIP CONVERGENCE CHART ───────────────────────────────────────────
+
+    (function() {
+        // Seeded PRNG so the chart looks the same on every load
+        let seed = 42;
+        function rand() {
+            seed = (seed * 1664525 + 1013904223) & 0x7fffffff;
+            return seed / 0x7fffffff;
+        }
+
+        const N = 500;
+        const labels = [], runningPct = [];
+        let heads = 0;
+        for (let i = 1; i <= N; i++) {
+            if (rand() < 0.5) heads++;
+            labels.push(i);
+            runningPct.push(+(heads / i * 100).toFixed(2));
+        }
+
+        new Chart(document.getElementById('coinChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Share heads',
+                        data: runningPct,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99,102,241,0.06)',
+                        fill: false,
+                        borderWidth: 1.5,
+                        tension: 0.2,
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    },
+                    {
+                        label: '50% (true probability)',
+                        data: labels.map(() => 50),
+                        borderColor: '#9ca3af',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        borderDash: [5, 5],
+                        pointRadius: 0,
+                        pointHoverRadius: 0
+                    }
+                ]
+            },
+            options: {
+                animation: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#fff',
+                        borderColor: '#e5e7eb',
+                        borderWidth: 1,
+                        titleColor: '#111827',
+                        bodyColor: '#6b7280',
+                        padding: 10,
+                        titleFont: { size: 13, weight: '600', family: 'Inter' },
+                        bodyFont: { size: 12, family: 'Inter' },
+                        filter: item => item.datasetIndex === 0,
+                        callbacks: {
+                            title: items => 'After ' + items[0].label + ' flips',
+                            label: item => '  Heads: ' + item.parsed.y.toFixed(1) + '%'
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        min: 0, max: 100,
+                        ticks: { callback: v => v + '%', color: '#9ca3af', font: { size: 12, family: 'Inter' }, maxTicksLimit: 6 },
+                        grid: { color: '#f3f4f6', drawBorder: false }
+                    },
+                    x: {
+                        ticks: {
+                            color: '#9ca3af',
+                            font: { size: 12, family: 'Inter' },
+                            maxTicksLimit: 8,
+                            callback: v => v + ' flips'
+                        },
+                        grid: { display: false, drawBorder: false }
+                    }
+                }
+            }
+        });
     })();
 </script>
 </body>
