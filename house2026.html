@@ -547,21 +547,29 @@ buildUnion();
 // ── METAPHORS ────────────────────────────────────────────────────────────────
 
 function metaphorForOdds(pct) {
-    if (pct <  2)  return '(about the odds of hitting a home run)';
-    if (pct <  5)  return '(about the odds of a full house in Texas Hold\'em)';
-    if (pct <  8)  return '(about the odds of rain on a random day in Vegas)';
-    if (pct < 15)  return '(about the odds of landing on tails thrice in a row)';
-    if (pct < 25)  return '(about the odds of a two pair in Texas Hold\'em)';
-    if (pct < 35)  return '(about the odds of an MLB player getting a hit)';
-    if (pct < 45)  return '(about the odds of flipping two heads in four flips)';
-    if (pct < 55)  return '(about the odds of a coin landing on heads)';
-    if (pct < 65)  return '(about the odds of drawing a number card)';
-    if (pct < 75)  return '(about the odds of Djokovic landing his first serve)';
-    if (pct < 85)  return '(about the odds of an NBA player making a free throw)';
-    if (pct < 92)  return '(about the odds of tails at least once in three flips)';
-    if (pct < 95)  return '(about the odds of surviving year one after heart bypass)';
-    if (pct < 97)  return '(about the odds of the dealer not getting a blackjack)';
-    return '(about the odds of getting rejected by QJE)';
+        if (pct <  2)  return '(about the odds of hitting a home run)';
+        if (pct <  5)  return '(about the odds of a full house in Texas Hold \'em)';
+        if (pct <  8)  return '(about the odds of rain on a random day in Vegas)';
+        if (pct < 15)  return '(about the odds of landing on tails thrice in a row)';
+		if (pct < 20)  return '(about the odds of flopping a pair in Texas Hold \'em)';
+        if (pct < 25)  return '(about the odds of a two pair in Texas Hold \'em)';
+        if (pct < 30)  return '(about the odds of an MLB player getting a hit)';
+		if (pct < 35)  return '(about the odds of an MLB player reaching first base)';
+		if (pct < 40)  return '(about the odds of an NBA player making a three pointer)';
+        if (pct < 45)  return '(about the odds of winning a hand of Blackjack)';
+		if (pct < 48)  return '(about the odds of winning a bet on black in American roulette)';
+        if (pct < 52)  return '(about the odds of a coin landing on heads)';
+		if (pct < 55)  return '(about the odds of the home team winning in most sports)';
+        if (pct < 60)  return '(about the odds of an MLB pitcher landing a strike)';
+		if (pct < 65)  return '(about the odds of an NFL QB completing a pass)';
+		if (pct < 70)  return '(about the odds of Djokovic landing his first serve)';
+        if (pct < 75)  return '(about the odds of drawing a number card)';
+        if (pct < 80)  return '(about the odds of an NBA player making a free throw)';
+		if (pct < 85)  return '(about the odds of rolling anything but a 1 on a die)';
+        if (pct < 92)  return '(about the odds of tails at least once in three flips)';
+        if (pct < 95)  return '(about the odds of surviving year one after heart bypass)';
+        if (pct < 97)  return '(about the odds of the dealer not getting a blackjack)';
+        return '(about the odds of getting rejected by QJE)';
 }
 
 // ── STATE ────────────────────────────────────────────────────────────────────
