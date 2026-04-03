@@ -49,6 +49,12 @@
             height: 52px;
         }
 
+        .topbar .tabs {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
         .topbar-title {
             font-size: 14px;
             font-weight: 700;
@@ -74,7 +80,7 @@
 
         .tab {
             font-family: inherit;
-            font-size: 13px;
+            font-size: 15px;
             font-weight: 500;
             padding: 0 14px;
             height: 52px;
@@ -143,6 +149,9 @@
             line-height: 1;
             letter-spacing: -0.04em;
             margin-bottom: 4px;
+            font-variant-numeric: tabular-nums;
+            min-width: 4.5ch;
+            display: block;
         }
 
         .side-stat-pct.rep { color: var(--rep); }
@@ -157,8 +166,13 @@
         .side-stat-metaphor {
             font-size: 11px;
             color: #9ca3af;
-            margin-top: 4px;
             font-style: italic;
+        }
+
+        .top-band-metaphors {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 24px 0;
         }
 
         .bar-middle {
@@ -555,7 +569,6 @@
             <div class="side-stat-party dem">Democrats</div>
             <div class="side-stat-pct dem" id="heroDemPct"></div>
             <div class="side-stat-label">chance of majority</div>
-            <div class="side-stat-metaphor" id="heroDemMeta"></div>
         </div>
     </div>
 
@@ -569,7 +582,7 @@
             <div class="seats-label right"><span style="color:#dc2626;">&#9642;</span> 31 seats not up for election</div>
         </div>
         <div class="hero-hung" id="heroHungRow">
-            Odds of a hung senate (no majority): <strong id="heroHungPct"></strong>
+            Odds of a hung senate (no majority): <strong id="heroHungPct"></strong><strong id="heroHungNA" style="display:none">not given by electionbettingodds.com</strong>
         </div>
     </div>
 
@@ -578,10 +591,14 @@
             <div class="side-stat-party rep">Republicans</div>
             <div class="side-stat-pct rep" id="heroRepPct"></div>
             <div class="side-stat-label">chance of majority</div>
-            <div class="side-stat-metaphor" id="heroRepMeta"></div>
         </div>
         <img src="thune_cartoon.png" class="side-cartoon" alt="Thune">
     </div>
+</div>
+
+<div class="top-band-metaphors">
+    <div class="side-stat-metaphor" id="heroDemMeta"></div>
+    <div class="side-stat-metaphor" id="heroRepMeta"></div>
 </div>
 
 <div class="page">
@@ -727,46 +744,46 @@
         // BEGIN_BETTING_DATA
         betting: {
             author: "odds from electionbettingodds.com",
-            dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-02"],
-            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5, 51.0, 49.2, 48.6],
-            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5, 49.0, 50.8, 51.4],
-            currentOdds: 48.6,
-            currentDemOdds: 51.4,
+            dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-03"],
+            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5, 51.0, 49.2, 47.8],
+            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5, 49.0, 50.8, 52.2],
+            currentOdds: 47.8,
+            currentDemOdds: 52.2,
             currentHungOdds: 0,
             stateOdds: {
-                'Alabama': { rep: 95.5, dem: 4.2 },
-                'Alaska': { rep: 40.9, dem: 59.1 },
+                'Alabama': { rep: 95.5, dem: 4.0 },
+                'Alaska': { rep: 41.0, dem: 58.8 },
                 'Arkansas': { rep: 93.9, dem: 5.6 },
-                'Colorado': { rep: 4.7, dem: 95.2 },
+                'Colorado': { rep: 4.8, dem: 95.2 },
                 'Delaware': { rep: 4.5, dem: 95.3 },
-                'Florida': { rep: 85.4, dem: 14.6 },
-                'Georgia': { rep: 17.0, dem: 82.7 },
+                'Florida': { rep: 85.0, dem: 15.0 },
+                'Georgia': { rep: 16.9, dem: 82.7 },
                 'Idaho': { rep: 95.0, dem: 5.0 },
                 'Illinois': { rep: 3.8, dem: 95.9 },
-                'Iowa': { rep: 62.6, dem: 37.1 },
+                'Iowa': { rep: 62.4, dem: 37.3 },
                 'Kansas': { rep: 93.9, dem: 5.6 },
-                'Kentucky': { rep: 93.0, dem: 6.0 },
+                'Kentucky': { rep: 92.7, dem: 6.3 },
                 'Louisiana': { rep: 91.8, dem: 8.2 },
-                'Maine': { rep: 27.8, dem: 72.2 },
+                'Maine': { rep: 28.1, dem: 71.9 },
                 'Massachusetts': { rep: 3.7, dem: 95.8 },
                 'Michigan': { rep: 18.5, dem: 81.5 },
-                'Minnesota': { rep: 9.6, dem: 90.4 },
-                'Mississippi': { rep: 92.7, dem: 7.3 },
-                'Montana': { rep: 84.9, dem: 7.6 },
-                'Nebraska': { rep: 88.4, dem: 2.1 },
+                'Minnesota': { rep: 9.5, dem: 90.5 },
+                'Mississippi': { rep: 92.5, dem: 7.5 },
+                'Montana': { rep: 84.8, dem: 8.7 },
+                'Nebraska': { rep: 88.5, dem: 2.1 },
                 'New Hampshire': { rep: 18.6, dem: 81.4 },
                 'New Jersey': { rep: 5.1, dem: 94.2 },
-                'New Mexico': { rep: 2.2, dem: 97.8 },
-                'North Carolina': { rep: 14.3, dem: 84.7 },
-                'Ohio': { rep: 43.5, dem: 56.5 },
-                'Oklahoma': { rep: 95.8, dem: 4.0 },
+                'New Mexico': { rep: 2.1, dem: 97.9 },
+                'North Carolina': { rep: 14.6, dem: 84.7 },
+                'Ohio': { rep: 44.0, dem: 56.0 },
+                'Oklahoma': { rep: 95.8, dem: 3.9 },
                 'Oregon': { rep: 5.5, dem: 94.2 },
-                'Rhode Island': { rep: 5.2, dem: 94.3 },
-                'South Carolina': { rep: 85.9, dem: 14.1 },
-                'South Dakota': { rep: 94.6, dem: 5.2 },
+                'Rhode Island': { rep: 5.0, dem: 94.3 },
+                'South Carolina': { rep: 85.4, dem: 14.6 },
+                'South Dakota': { rep: 95.1, dem: 4.8 },
                 'Tennessee': { rep: 93.2, dem: 6.7 },
-                'Texas': { rep: 56.5, dem: 43.5 },
-                'Virginia': { rep: 5.3, dem: 93.8 },
+                'Texas': { rep: 56.8, dem: 42.9 },
+                'Virginia': { rep: 5.4, dem: 93.8 },
                 'West Virginia': { rep: 94.5, dem: 5.2 },
                 'Wyoming': { rep: 95.2, dem: 4.5 }
             }
@@ -983,7 +1000,11 @@
             segment.dataset.sn       = state.name;
 
             segment.addEventListener('mouseenter', function(event) {
-                tt.html(`<strong>${state.name}</strong><br>Republican: ${state.rep}%<br>Democrat: ${state.dem}%` + (state.other > 0 ? `<br>Other: ${state.other}%` : ''))
+                const meta = `<em style="color:#9ca3af;font-size:11px">${metaphorForOdds(Math.max(state.rep, state.dem, state.other))}</em>`;
+                const repLine = `Republican: ${state.rep}%` + (state.rep >= state.dem && state.rep >= state.other ? `<br>${meta}` : '');
+                const demLine = `Democrat: ${state.dem}%` + (state.dem > state.rep && state.dem >= state.other ? `<br>${meta}` : '');
+                const otherLine = state.other > 0 ? `Other: ${state.other}%` + (state.other > state.rep && state.other > state.dem ? `<br>${meta}` : '') : '';
+                tt.html(`<strong>${state.name}</strong><br>${repLine}<br>${demLine}` + (state.other > 0 ? `<br>${otherLine}` : ''))
                   .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 36) + 'px')
                   .classed('show', true);
                 d3.selectAll('.state').classed('highlight', s => s.properties.name === state.name);
@@ -1032,7 +1053,14 @@
                     const name=d.properties.name, o=dataSources[currentSource].stateOdds[name];
                     document.querySelectorAll('.state-segment').forEach(s=>s.classList.toggle('highlight',s.dataset.sn===name));
                     d3.selectAll('#dotPlot circle').each(function(_,i){ /* dots don't have easy class, skip */ });
-                    tt.html(o?`<strong>${name}</strong><br>Republican: ${o.rep}%<br>Democrat: ${o.dem}%`+(o.other>0?`<br>Other: ${o.other}%`:''):`<strong>${name}</strong><br>No Senate race in 2026`)
+                    if (o) {
+                        const oth = o.other||0, meta = `<em style="color:#9ca3af;font-size:11px">${metaphorForOdds(Math.max(o.rep,o.dem,oth))}</em>`;
+                        const repLine = `Republican: ${o.rep}%`+(o.rep>=o.dem&&o.rep>=oth?`<br>${meta}`:'');
+                        const demLine = `Democrat: ${o.dem}%`+(o.dem>o.rep&&o.dem>=oth?`<br>${meta}`:'');
+                        const othLine = oth>0?`Other: ${oth}%`+(oth>o.rep&&oth>o.dem?`<br>${meta}`:''):'';
+                        tt.html(`<strong>${name}</strong><br>${repLine}<br>${demLine}`+(oth>0?`<br>${othLine}`:''));
+                    } else { tt.html(`<strong>${name}</strong><br>No Senate race in 2026`); }
+                    tt
                       .style('left',(event.pageX+12)+'px').style('top',(event.pageY-36)+'px').classed('show',true);
                 })
                 .on('mouseout',()=>{ tt.classed('show',false); });
@@ -1046,13 +1074,21 @@
         if (pct <  5)  return '(about the odds of a full house in Texas Hold \'em)';
         if (pct <  8)  return '(about the odds of rain on a random day in Vegas)';
         if (pct < 15)  return '(about the odds of landing on tails thrice in a row)';
+		if (pct < 20)  return '(about the odds of flopping a pair in Texas Hold \'em)';
         if (pct < 25)  return '(about the odds of a two pair in Texas Hold \'em)';
-        if (pct < 35)  return '(about the odds of an MLB player getting a hit)';
-        if (pct < 45)  return '(about the odds of flipping two heads in four flips)';
-        if (pct < 55)  return '(about the odds of a coin landing on heads)';
-        if (pct < 65)  return '(about the odds of drawing a number card)';
-        if (pct < 75)  return '(about the odds of Djokovic landing his first serve)';
-        if (pct < 85)  return '(about the odds of an NBA player making a free throw)';
+        if (pct < 30)  return '(about the odds of an MLB player getting a hit)';
+		if (pct < 35)  return '(about the odds of an MLB player reaching first base)';
+		if (pct < 40)  return '(about the odds of an NBA player making a three pointer)';
+        if (pct < 45)  return '(about the odds of winning a hand of Blackjack)';
+		if (pct < 48)  return '(about the odds of winning a bet on black in American roulette)';
+        if (pct < 52)  return '(about the odds of a coin landing on heads)';
+		if (pct < 55)  return '(about the odds of the home team winning in most sports)';
+        if (pct < 60)  return '(about the odds of an MLB pitcher landing a strike)';
+		if (pct < 65)  return '(about the odds of an NFL QB completing a pass)';
+		if (pct < 70)  return '(about the odds of Djokovic landing his first serve)';
+        if (pct < 75)  return '(about the odds of drawing a number card)';
+        if (pct < 80)  return '(about the odds of an NBA player making a free throw)';
+		if (pct < 85)  return '(about the odds of rolling anything but a 1 on a die)';
         if (pct < 92)  return '(about the odds of tails at least once in three flips)';
         if (pct < 95)  return '(about the odds of surviving year one after heart bypass)';
         if (pct < 97)  return '(about the odds of the dealer not getting a blackjack)';
@@ -1070,9 +1106,10 @@
         const targetDem  = d.currentDemOdds;
         const targetHung = d.currentHungOdds || 0;
 
-        document.getElementById('heroId').textContent       = 'Updated Apr 2, 2026';
+        document.getElementById('heroId').textContent       = 'Updated Apr 3, 2026';
         document.getElementById('topbarMeta').textContent   = d.author;
-        document.getElementById('heroHungRow').style.display = targetHung > 0 ? '' : 'none';
+        document.getElementById('heroHungPct').style.display = targetHung > 0 ? '' : 'none';
+        document.getElementById('heroHungNA').style.display  = targetHung > 0 ? 'none' : '';
 
         if (!animate || heroCurrentRep === null) {
             heroCurrentRep  = targetRep;
