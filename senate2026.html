@@ -757,30 +757,30 @@
                 'Colorado': { rep: 4.8, dem: 95.2 },
                 'Delaware': { rep: 4.5, dem: 95.3 },
                 'Florida': { rep: 85.0, dem: 15.0 },
-                'Georgia': { rep: 16.9, dem: 82.7 },
+                'Georgia': { rep: 16.9, dem: 82.8 },
                 'Idaho': { rep: 95.0, dem: 5.0 },
-                'Illinois': { rep: 3.8, dem: 95.9 },
+                'Illinois': { rep: 3.6, dem: 96.0 },
                 'Iowa': { rep: 62.4, dem: 37.3 },
                 'Kansas': { rep: 93.9, dem: 5.6 },
                 'Kentucky': { rep: 92.7, dem: 6.3 },
                 'Louisiana': { rep: 91.8, dem: 8.2 },
-                'Maine': { rep: 28.1, dem: 71.9 },
+                'Maine': { rep: 28.4, dem: 71.6 },
                 'Massachusetts': { rep: 3.7, dem: 95.8 },
                 'Michigan': { rep: 18.5, dem: 81.5 },
-                'Minnesota': { rep: 9.5, dem: 90.5 },
+                'Minnesota': { rep: 9.6, dem: 90.4 },
                 'Mississippi': { rep: 92.5, dem: 7.5 },
                 'Montana': { rep: 84.8, dem: 8.7 },
                 'Nebraska': { rep: 88.5, dem: 2.1 },
-                'New Hampshire': { rep: 18.6, dem: 81.4 },
+                'New Hampshire': { rep: 17.1, dem: 82.9 },
                 'New Jersey': { rep: 5.1, dem: 94.2 },
-                'New Mexico': { rep: 2.1, dem: 97.9 },
+                'New Mexico': { rep: 2.0, dem: 98.0 },
                 'North Carolina': { rep: 14.6, dem: 84.7 },
                 'Ohio': { rep: 44.0, dem: 56.0 },
                 'Oklahoma': { rep: 95.8, dem: 3.9 },
                 'Oregon': { rep: 5.5, dem: 94.2 },
                 'Rhode Island': { rep: 5.0, dem: 94.3 },
                 'South Carolina': { rep: 85.4, dem: 14.6 },
-                'South Dakota': { rep: 95.1, dem: 4.8 },
+                'South Dakota': { rep: 95.0, dem: 4.9 },
                 'Tennessee': { rep: 93.2, dem: 6.7 },
                 'Texas': { rep: 56.8, dem: 42.9 },
                 'Virginia': { rep: 5.4, dem: 93.8 },
@@ -1000,11 +1000,14 @@
             segment.dataset.sn       = state.name;
 
             segment.addEventListener('mouseenter', function(event) {
-                const meta = `<em style="color:#9ca3af;font-size:11px">${metaphorForOdds(Math.max(state.rep, state.dem, state.other))}</em>`;
-                const repLine = `Republican: ${state.rep}%` + (state.rep >= state.dem && state.rep >= state.other ? `<br>${meta}` : '');
-                const demLine = `Democrat: ${state.dem}%` + (state.dem > state.rep && state.dem >= state.other ? `<br>${meta}` : '');
-                const otherLine = state.other > 0 ? `Other: ${state.other}%` + (state.other > state.rep && state.other > state.dem ? `<br>${meta}` : '') : '';
-                tt.html(`<strong>${state.name}</strong><br>${repLine}<br>${demLine}` + (state.other > 0 ? `<br>${otherLine}` : ''))
+                const em = p => `<em style="color:#9ca3af;font-size:11px">└ ${metaphorForOdds(p)}</em>`;
+                const lines = [
+                    { label: 'Republican', pct: state.rep },
+                    { label: 'Democrat',   pct: state.dem },
+                    ...(state.other > 0 ? [{ label: 'Other', pct: state.other }] : [])
+                ].sort((a, b) => b.pct - a.pct)
+                 .map(l => `${l.label}: ${l.pct}%<br>${em(l.pct)}`);
+                tt.html(`<strong>${state.name}</strong><br>${lines.join('<br>')}`)
                   .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 36) + 'px')
                   .classed('show', true);
                 d3.selectAll('.state').classed('highlight', s => s.properties.name === state.name);
@@ -1054,11 +1057,14 @@
                     document.querySelectorAll('.state-segment').forEach(s=>s.classList.toggle('highlight',s.dataset.sn===name));
                     d3.selectAll('#dotPlot circle').each(function(_,i){ /* dots don't have easy class, skip */ });
                     if (o) {
-                        const oth = o.other||0, meta = `<em style="color:#9ca3af;font-size:11px">${metaphorForOdds(Math.max(o.rep,o.dem,oth))}</em>`;
-                        const repLine = `Republican: ${o.rep}%`+(o.rep>=o.dem&&o.rep>=oth?`<br>${meta}`:'');
-                        const demLine = `Democrat: ${o.dem}%`+(o.dem>o.rep&&o.dem>=oth?`<br>${meta}`:'');
-                        const othLine = oth>0?`Other: ${oth}%`+(oth>o.rep&&oth>o.dem?`<br>${meta}`:''):'';
-                        tt.html(`<strong>${name}</strong><br>${repLine}<br>${demLine}`+(oth>0?`<br>${othLine}`:''));
+                        const oth = o.other||0, em = p => `<em style="color:#9ca3af;font-size:11px">└ ${metaphorForOdds(p)}</em>`;
+                        const lines = [
+                            { label: 'Republican', pct: o.rep },
+                            { label: 'Democrat',   pct: o.dem },
+                            ...(oth>0 ? [{ label: 'Other', pct: oth }] : [])
+                        ].sort((a,b) => b.pct - a.pct)
+                         .map(l => `${l.label}: ${l.pct}%<br>${em(l.pct)}`);
+                        tt.html(`<strong>${name}</strong><br>${lines.join('<br>')}`);
                     } else { tt.html(`<strong>${name}</strong><br>No Senate race in 2026`); }
                     tt
                       .style('left',(event.pageX+12)+'px').style('top',(event.pageY-36)+'px').classed('show',true);
