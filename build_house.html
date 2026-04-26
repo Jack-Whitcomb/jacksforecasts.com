@@ -24,7 +24,11 @@ body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:
 header{background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 header h1{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-0.01em;white-space:nowrap}
 
-#scoreboard{display:flex;align-items:center;gap:16px;padding:6px 14px;border-radius:6px;border:1px solid var(--rule)}
+#scoreboard{display:flex;align-items:center;gap:16px;padding:6px 14px;border-radius:6px;border:1px solid var(--rule);position:relative}
+#sb-info-btn{position:absolute;top:3px;left:5px;width:13px;height:13px;border-radius:50%;background:var(--ink-2);color:#fff;font-size:8px;font-weight:700;font-style:italic;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;font-family:Georgia,serif}
+#sb-info-btn:hover{background:var(--ink)}
+#sb-info-pop{display:none;position:absolute;top:calc(100% + 6px);right:0;width:220px;background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;font-size:.72rem;color:var(--ink);line-height:1.55;box-shadow:0 4px 14px rgba(0,0,0,.1);z-index:100}
+#sb-info-pop.open{display:block}
 .score-block{text-align:center}
 .score-num{font-size:1.5rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
 .score-num.d{color:var(--dem)}
@@ -105,6 +109,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
     <button id="sweep-r" class="sweep-btn sweep-r">Max R ▶</button>
   </div>
   <div id="scoreboard">
+    <button id="sb-info-btn">i</button>
+    <div id="sb-info-pop">Seat totals reflect the partisanship of districts in each state's enacted 119th Congress map, not the 2024 election results.</div>
     <div class="score-block"><div class="score-num d" id="td">—</div><div class="score-lbl">Democrats</div></div>
     <div class="score-sep">|</div>
     <div class="score-block"><div class="score-num r" id="tr">—</div><div class="score-lbl">Republicans</div></div>
@@ -310,7 +316,8 @@ function refreshPanel(abbr) {
   // Actual map at the baseline D count; gerrymanders at all other D counts
   const items = [];
   if (d === BASE[abbr].d && ACTUAL[lc]) {
-    items.push({src: ACTUAL[lc], cap: '119th Congress (enacted)'});
+    const actualCap = abbr === 'VA' ? '119th Congress (map preceding 2026 referendum)' : '119th Congress (enacted)';
+    items.push({src: ACTUAL[lc], cap: actualCap});
   } else {
     const gerrymanders = MAPS[lc]?.[d] ?? [];
     gerrymanders.forEach(p => items.push({src: p, cap: `Gerrymandered · ${mapVariantLabel(p)}`}));
@@ -441,6 +448,11 @@ fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json')
 </div>
 
 <script>
+const sbInfoBtn = document.getElementById('sb-info-btn');
+const sbInfoPop = document.getElementById('sb-info-pop');
+sbInfoBtn.addEventListener('click', e => { e.stopPropagation(); sbInfoPop.classList.toggle('open'); });
+document.addEventListener('click', () => sbInfoPop.classList.remove('open'));
+
 const howModal = document.getElementById('how-modal');
 document.getElementById('how-btn').addEventListener('click', () => howModal.classList.add('open'));
 document.getElementById('how-close').addEventListener('click', () => howModal.classList.remove('open'));
