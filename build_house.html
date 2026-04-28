@@ -115,7 +115,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
   </div>
   <div id="scoreboard">
     <button id="sb-info-btn">i</button>
-    <div id="sb-info-pop">Seat totals reflect the partisanship of districts in each state's enacted 119th Congress map as measured by 2020 Presidential results, not the 2024 election results.</div>
+    <div id="sb-info-pop">Seat totals reflect the partisanship of districts in each state's enacted 119th Congress map, not the 2024 election results.</div>
     <div class="score-block"><div class="score-num d" id="td">—</div><div class="score-lbl">Democrats</div></div>
     <div class="score-sep">|</div>
     <div class="score-block"><div class="score-num r" id="tr">—</div><div class="score-lbl">Republicans</div></div>
@@ -301,8 +301,8 @@ function updateSliderTicks(abbr) {
   const ticksEl = document.getElementById('sl-ticks');
   const noteEl  = document.getElementById('sl-tick-note');
   ticksEl.innerHTML = '';
-  const available = Object.keys(MAPS[lc] || {}).map(Number);
-  if (available.length === 0 || t === 0) { noteEl.style.display = 'none'; return; }
+  const available = [...new Set([...Object.keys(MAPS[lc] || {}).map(Number), BASE[abbr].d])];
+  if (t === 0) { noteEl.style.display = 'none'; return; }
   noteEl.style.display = 'flex';
   for (const d of available) {
     const tick = document.createElement('div');
@@ -417,9 +417,8 @@ async function runSweep(dir) {
 
   for (const abbr of Object.keys(BASE)) {
     const lc = abbr.toLowerCase();
-    const dKeys = Object.keys(MAPS[lc] || {}).map(Number);
-    if (dKeys.length === 0) continue;
-    const targetD = dir === 'R' ? Math.min(...dKeys) : Math.max(...dKeys);
+    const allKeys = [...new Set([...Object.keys(MAPS[lc] || {}).map(Number), BASE[abbr].d])];
+    const targetD = dir === 'R' ? Math.min(...allKeys) : Math.max(...allKeys);
     comp[abbr].d = targetD;
     comp[abbr].r = comp[abbr].t - targetD;
     d3.select(`#s-${abbr}`).attr('fill', stateClr(abbr));
