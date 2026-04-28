@@ -57,9 +57,14 @@ header h1{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-0.01em
 .cr{background:var(--rep);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;overflow:hidden;min-width:0;transition:width .15s}
 
 .slbl{font-size:.67rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px;font-weight:600}
-input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,var(--rep),#8b3fbe 50%,var(--dem));outline:none;cursor:pointer;margin-bottom:8px;display:block}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,var(--rep),#8b3fbe 50%,var(--dem));outline:none;cursor:pointer;margin-bottom:4px;display:block;position:relative;z-index:1}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+
+#sl-ticks{position:relative;height:10px;margin-bottom:3px}
+.sl-tick{position:absolute;top:0;width:3px;height:10px;background:var(--ink);border-radius:1px;transform:translateX(-50%)}
+#sl-tick-note{font-size:.62rem;color:var(--ink-2);display:none;align-items:center;gap:6px;margin-bottom:10px}
+.tick-swatch{display:inline-block;width:3px;height:10px;background:var(--ink);border-radius:1px;flex-shrink:0}
 
 .scounts{display:flex;justify-content:space-between;margin-bottom:15px}
 .dv{color:var(--dem);font-weight:700;font-size:.88rem}
@@ -127,6 +132,8 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
       <div class="cbar"><div class="cd" id="cd"></div><div class="cr" id="cr"></div></div>
       <div class="slbl">Democratic seats</div>
       <input type="range" id="sl" min="0" max="1" step="1" value="0">
+      <div id="sl-ticks"></div>
+      <div id="sl-tick-note"><span class="tick-swatch"></span> Seat count with an available map</div>
       <div class="scounts"><span class="dv" id="dv"></span><span class="rv" id="rv"></span></div>
       <div id="ia">
         <img id="mi" alt="District map">
@@ -281,10 +288,29 @@ async function showPanel(abbr) {
   const sl = document.getElementById('sl');
   sl.max = c.t; sl.value = c.d;
   await discoverMaps(abbr);
+  updateSliderTicks(abbr);
   const hm = Object.keys(MAPS[lc] || {}).length > 0;
   document.getElementById('sn').innerHTML =
     NAMES[abbr] + (hm ? ' <span class="badge">Maps available</span>' : '');
   refreshPanel(abbr);
+}
+
+function updateSliderTicks(abbr) {
+  const lc = abbr.toLowerCase();
+  const t = BASE[abbr].t;
+  const ticksEl = document.getElementById('sl-ticks');
+  const noteEl  = document.getElementById('sl-tick-note');
+  ticksEl.innerHTML = '';
+  const available = Object.keys(MAPS[lc] || {}).map(Number);
+  if (available.length === 0 || t === 0) { noteEl.style.display = 'none'; return; }
+  noteEl.style.display = 'flex';
+  for (const d of available) {
+    const tick = document.createElement('div');
+    tick.className = 'sl-tick';
+    // Align with slider thumb: thumb center travels from 9px to (100% - 9px)
+    tick.style.left = `calc(${d/t*100}% - ${d/t*18}px + 9px)`;
+    ticksEl.appendChild(tick);
+  }
 }
 
 function mapVariantLabel(path) {
