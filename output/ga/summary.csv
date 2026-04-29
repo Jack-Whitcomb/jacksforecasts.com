@@ -1,0 +1,16 @@
+"target_D","target_R","achieved","source"
+0,14,FALSE,NA
+1,13,FALSE,NA
+2,12,FALSE,NA
+3,11,TRUE,"phase1"
+4,10,TRUE,"phase1"
+5,9,TRUE,"phase1"
+6,8,TRUE,"phase1"
+7,7,TRUE,"phase1"
+8,6,TRUE,"phase1"
+9,5,FALSE,NA
+10,4,FALSE,NA
+11,3,FALSE,NA
+12,2,FALSE,NA
+13,1,FALSE,NA
+14,0,FALSE,NA

@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Build your own US House through gerrymandering!</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rep:#dc2626;
+  --dem:#1d4ed8;
+  --rep-bg:#fef2f2;
+  --dem-bg:#eff6ff;
+  --ink:#111827;
+  --ink-2:#6b7280;
+  --rule:#e5e7eb;
+  --bg:#ffffff;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;background:var(--bg);color:var(--ink);height:100vh;display:flex;flex-direction:column;overflow:hidden;-webkit-font-smoothing:antialiased}
+
+header{background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--rule);padding:0 24px;height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+header h1{font-size:14px;font-weight:700;color:var(--ink);letter-spacing:-0.01em;white-space:nowrap}
+
+#scoreboard{display:flex;align-items:center;gap:16px;padding:6px 14px;border-radius:6px;border:1px solid var(--rule);position:relative}
+#sb-info-btn{position:absolute;top:3px;left:5px;width:13px;height:13px;border-radius:50%;background:var(--ink-2);color:#fff;font-size:8px;font-weight:700;font-style:italic;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;font-family:Georgia,serif}
+#sb-info-btn:hover{background:var(--ink)}
+#sb-info-pop{display:none;position:absolute;top:calc(100% + 6px);right:0;width:220px;background:var(--bg);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;font-size:.72rem;color:var(--ink);line-height:1.55;box-shadow:0 4px 14px rgba(0,0,0,.1);z-index:100}
+#sb-info-pop.open{display:block}
+.score-block{text-align:center}
+.score-num{font-size:1.5rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
+.score-num.d{color:var(--dem)}
+.score-num.r{color:var(--rep)}
+.score-lbl{font-size:.58rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.7px;margin-top:1px}
+.score-sep{color:var(--rule);font-size:1.3rem}
+
+#main{display:flex;flex:1;overflow:hidden}
+#map-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:12px;min-width:0;background:var(--bg)}
+#us-map{width:100%;height:100%}
+
+.s{stroke:#fff;stroke-width:1px;cursor:pointer}
+.s:hover{opacity:.75;stroke:#374151;stroke-width:1.5px}
+.s.sel{opacity:.75;stroke:#374151;stroke-width:2px}
+
+#panel{width:310px;background:var(--bg);border-left:1px solid var(--rule);display:flex;flex-direction:column;flex-shrink:0}
+#ph{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;padding:28px;color:var(--ink-2);font-size:.84rem;line-height:1.85;font-style:italic}
+#pc{display:none;flex-direction:column;padding:16px;overflow-y:auto;flex:1}
+
+#sn{font-size:1rem;font-weight:700;color:var(--ink);margin-bottom:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;letter-spacing:-.01em}
+.badge{font-size:.58rem;padding:2px 7px;border-radius:10px;background:#dcfce7;color:#166534;font-weight:700}
+#sm{font-size:.76rem;color:var(--ink-2);margin-bottom:13px}
+
+.cbar{display:flex;height:24px;border-radius:4px;overflow:hidden;margin-bottom:13px;flex-shrink:0;border:1px solid var(--rule)}
+.cd{background:var(--dem);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;overflow:hidden;min-width:0;transition:width .15s}
+.cr{background:var(--rep);display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;overflow:hidden;min-width:0;transition:width .15s}
+
+.slbl{font-size:.67rem;color:var(--ink-2);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px;font-weight:600}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:linear-gradient(to right,var(--rep),#8b3fbe 50%,var(--dem));outline:none;cursor:pointer;margin-bottom:4px;display:block;position:relative;z-index:1}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.18)}
+
+#sl-ticks{position:relative;height:10px;margin-bottom:3px}
+.sl-tick{position:absolute;top:0;width:3px;height:10px;background:var(--ink);border-radius:1px;transform:translateX(-50%)}
+#sl-tick-note{font-size:.62rem;color:var(--ink-2);display:none;align-items:center;gap:6px;margin-bottom:10px}
+.tick-swatch{display:inline-block;width:3px;height:10px;background:var(--ink);border-radius:1px;flex-shrink:0}
+
+.scounts{display:flex;justify-content:space-between;margin-bottom:15px}
+.dv{color:var(--dem);font-weight:700;font-size:.88rem}
+.rv{color:var(--rep);font-weight:700;font-size:.88rem}
+
+#ia{display:flex;flex-direction:column}
+#mi{width:100%;border-radius:4px;border:1px solid var(--rule);display:none}
+#me{display:none;background:#f9fafb;border:1px dashed var(--rule);border-radius:4px;padding:18px 12px;color:var(--ink-2);font-size:.78rem;line-height:1.6;text-align:center}
+#me strong{color:var(--ink-2)}
+#cap{font-size:.8rem;color:var(--ink);text-align:center;margin-top:6px;font-weight:500}
+
+#legend{flex-shrink:0;padding:8px 14px;background:#f9fafb;border-top:1px solid var(--rule);display:flex;gap:14px;align-items:center;font-size:.68rem;color:var(--ink-2);flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px}
+.ls{width:12px;height:12px;border-radius:2px;flex-shrink:0}
+#legend span{margin-left:auto;color:var(--ink-2);font-size:.65rem;font-style:italic}
+
+#mnav{display:flex;align-items:center;justify-content:space-between;margin-top:5px;margin-bottom:2px;display:none}
+.mnbtn{background:var(--bg);border:1px solid var(--rule);color:var(--ink);padding:3px 10px;border-radius:4px;cursor:pointer;font-size:.78rem;line-height:1.4;font-family:inherit}
+.mnbtn:hover:not(:disabled){background:#f3f4f6}
+.mnbtn:disabled{opacity:.3;cursor:default}
+#midx{font-size:.7rem;color:var(--ink-2);flex:1;text-align:center}
+
+#how-btn{font-size:12px;color:var(--ink-2);background:none;border:none;padding:0;cursor:pointer;white-space:nowrap;animation:howpulse 2s ease-in-out infinite;font-family:inherit}
+@keyframes howpulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.sweep-btn{font-size:11px;padding:3px 9px;border-radius:4px;border:1px solid;cursor:pointer;font-family:inherit;font-weight:600;letter-spacing:.01em;white-space:nowrap;transition:opacity .15s}
+.sweep-btn:disabled{opacity:.35;cursor:default}
+.sweep-r{background:var(--rep-bg);color:var(--rep);border-color:#fca5a5}
+.sweep-r:hover:not(:disabled){background:#fee2e2}
+.sweep-d{background:var(--dem-bg);color:var(--dem);border-color:#93c5fd}
+.sweep-d:hover:not(:disabled){background:#dbeafe}
+#how-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:999;align-items:center;justify-content:center}
+#how-modal.open{display:flex}
+#how-box{background:var(--bg);border:1px solid var(--rule);border-radius:8px;padding:24px 28px;max-width:440px;color:var(--ink);font-size:13px;line-height:1.75;position:relative;box-shadow:0 4px 24px rgba(0,0,0,.1)}
+#how-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--ink-2);font-size:1.1rem;cursor:pointer;font-family:inherit}
+#how-close:hover{color:var(--ink)}
+
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;gap:10px">
+    <h1>Build your own US House through gerrymandering!</h1>
+    <button id="how-btn">How does this work?</button>
+    <button id="sweep-d" class="sweep-btn sweep-d">◀ Max D</button>
+    <button id="sweep-r" class="sweep-btn sweep-r">Max R ▶</button>
+  </div>
+  <div id="scoreboard">
+    <button id="sb-info-btn">i</button>
+    <div id="sb-info-pop">Seat totals reflect the partisanship of districts in each state's enacted 119th Congress map, not the 2024 election results.</div>
+    <div class="score-block"><div class="score-num d" id="td">—</div><div class="score-lbl">Democrats</div></div>
+    <div class="score-sep">|</div>
+    <div class="score-block"><div class="score-num r" id="tr">—</div><div class="score-lbl">Republicans</div></div>
+  </div>
+</header>
+
+<div id="main">
+  <div id="map-wrap"><svg id="us-map"></svg></div>
+  <div id="panel">
+    <div id="ph">← Click any state to adjust its<br>congressional composition.</div>
+    <div id="pc">
+      <div id="sn"></div>
+      <div id="sm"></div>
+      <div class="cbar"><div class="cd" id="cd"></div><div class="cr" id="cr"></div></div>
+      <div class="slbl">Democratic seats</div>
+      <input type="range" id="sl" min="0" max="1" step="1" value="0">
+      <div id="sl-ticks"></div>
+      <div id="sl-tick-note"><span class="tick-swatch"></span> Seat count with an available map</div>
+      <div class="scounts"><span class="dv" id="dv"></span><span class="rv" id="rv"></span></div>
+      <div id="ia">
+        <img id="mi" alt="District map">
+        <div id="mnav">
+          <button class="mnbtn" id="mprev">&#9664;</button>
+          <span id="midx"></span>
+          <button class="mnbtn" id="mnext">&#9654;</button>
+        </div>
+        <div id="me"></div>
+        <div id="cap"></div>
+      </div>
+    </div>
+    <div id="legend">
+      <div class="li"><div class="ls" style="background:#3B7FC4"></div>All D</div>
+      <div class="li"><div class="ls" style="background:#8B44AC"></div>Even</div>
+      <div class="li"><div class="ls" style="background:#C0392B"></div>All R</div>
+      <span>119th Congress baseline</span>
+    </div>
+  </div>
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3/dist/topojson-client.min.js"></script>
+<script>
+const FIPS = {
+  '01':'AL','02':'AK','04':'AZ','05':'AR','06':'CA','08':'CO','09':'CT','10':'DE',
+  '12':'FL','13':'GA','15':'HI','16':'ID','17':'IL','18':'IN','19':'IA','20':'KS',
+  '21':'KY','22':'LA','23':'ME','24':'MD','25':'MA','26':'MI','27':'MN','28':'MS',
+  '29':'MO','30':'MT','31':'NE','32':'NV','33':'NH','34':'NJ','35':'NM','36':'NY',
+  '37':'NC','38':'ND','39':'OH','40':'OK','41':'OR','42':'PA','44':'RI','45':'SC',
+  '46':'SD','47':'TN','48':'TX','49':'UT','50':'VT','51':'VA','53':'WA','54':'WV',
+  '55':'WI','56':'WY'
+};
+
+const NAMES = {
+  AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',
+  CT:'Connecticut',DE:'Delaware',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',
+  IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',
+  ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',
+  MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',
+  NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',
+  ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',
+  RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',
+  UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',
+  WI:'Wisconsin',WY:'Wyoming'
+};
+
+// 119th Congress (2025-2026) seat breakdown
+const BASE = {
+  AL:{t:7, d:2,r:5}, AK:{t:1, d:0,r:1}, AZ:{t:9, d:4,r:5}, AR:{t:4, d:0,r:4},
+  CA:{t:52,d:48,r:4}, CO:{t:8, d:5,r:3}, CT:{t:5, d:5,r:0}, DE:{t:1, d:1,r:0},
+  FL:{t:28,d:8,r:20}, GA:{t:14,d:5,r:9}, HI:{t:2, d:2,r:0}, ID:{t:2, d:0,r:2},
+  IL:{t:17,d:14,r:3}, IN:{t:9, d:2,r:7}, IA:{t:4, d:0,r:4}, KS:{t:4, d:1,r:3},
+  KY:{t:6, d:1,r:5}, LA:{t:6, d:2,r:4}, ME:{t:2, d:1,r:1}, MD:{t:8, d:7,r:1},
+  MA:{t:9, d:9,r:0}, MI:{t:13,d:7,r:6}, MN:{t:8, d:4,r:4}, MS:{t:4, d:1,r:3},
+  MO:{t:8, d:2,r:6}, MT:{t:2, d:0,r:2}, NE:{t:3, d:1,r:2}, NV:{t:4, d:3,r:1},
+  NH:{t:2, d:2,r:0}, NJ:{t:12,d:10,r:2}, NM:{t:3, d:3,r:0}, NY:{t:26,d:20,r:6},
+  NC:{t:14,d:4,r:10},ND:{t:1, d:0,r:1}, OH:{t:15,d:4,r:11},OK:{t:5, d:0,r:5},
+  OR:{t:6, d:5,r:1}, PA:{t:17,d:9,r:8}, RI:{t:2, d:2,r:0}, SC:{t:7, d:1,r:6},
+  SD:{t:1, d:0,r:1}, TN:{t:9, d:1,r:8}, TX:{t:38,d:10,r:28},UT:{t:4, d:0,r:4},
+  VT:{t:1, d:1,r:0}, VA:{t:11,d:7,r:4}, WA:{t:10,d:7,r:3}, WV:{t:2, d:0,r:2},
+  WI:{t:8, d:2,r:6}, WY:{t:1, d:0,r:1}
+};
+
+// Gerrymander maps — discovered dynamically on first click per state.
+// MAPS[lc] is set by discoverMaps(); undefined means not yet probed.
+const MAPS = {};
+const probed = new Set();
+
+function probeImage(src) {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(true);
+    img.onerror = () => resolve(false);
+    img.src = src;
+  });
+}
+
+async function discoverMaps(abbr) {
+  if (probed.has(abbr)) return;
+  probed.add(abbr);
+  const lc = abbr.toLowerCase();
+  const t = BASE[abbr].t;
+  const probes = [];
+  for (let d = 0; d <= t; d++) {
+    const r = t - d;
+    const b = `output/${lc}/${lc}_${d}D_${r}R`;
+    for (const p of [`${b}_1pct.png`,`${b}_10pct.png`,`${b}_100pct.png`,`${b}.png`])
+      probes.push({d, path: p});
+    if (lc === 'mi') {
+      const lb = `output/michigan_${d}D_${r}R`;
+      for (const p of [`${lb}_1pct.png`,`${lb}_10pct.png`,`${lb}_100pct.png`,`${lb}.png`])
+        probes.push({d, path: p});
+    }
+  }
+  const hits = (await Promise.all(
+    probes.map(p => probeImage(p.path).then(ok => ok ? p : null))
+  )).filter(Boolean);
+  const sm = {};
+  for (const {d, path} of hits) (sm[d] = sm[d] || []).push(path);
+  const pctPri = p => { const m = p.match(/_(\d+)pct\.png$/); return m ? +m[1] : 9999; };
+  for (const d of Object.keys(sm)) sm[d].sort((a, b) => pctPri(a) - pctPri(b));
+  MAPS[lc] = sm;
+}
+
+// Actual 119th Congress maps — generated by generate_actual_maps_119.py
+// Updated automatically by update_html_maps.R
+/* @@ACTUAL@@ */ const ACTUAL = {
+  al:'output/al/al_actual.png', ak:'output/ak/ak_actual.png', az:'output/az/az_actual.png', ar:'output/ar/ar_actual.png',
+  ca:'output/ca/ca_actual.png', co:'output/co/co_actual.png', ct:'output/ct/ct_actual.png', de:'output/de/de_actual.png',
+  fl:'output/fl/fl_actual.png', ga:'output/ga/ga_actual.png', hi:'output/hi/hi_actual.png', id:'output/id/id_actual.png',
+  il:'output/il/il_actual.png', in:'output/in/in_actual.png', ia:'output/ia/ia_actual.png', ks:'output/ks/ks_actual.png',
+  ky:'output/ky/ky_actual.png', la:'output/la/la_actual.png', me:'output/me/me_actual.png', md:'output/md/md_actual.png',
+  ma:'output/ma/ma_actual.png', mi:'output/mi/mi_actual.png', mn:'output/mn/mn_actual.png', ms:'output/ms/ms_actual.png',
+  mo:'output/mo/mo_actual.png', mt:'output/mt/mt_actual.png', ne:'output/ne/ne_actual.png', nv:'output/nv/nv_actual.png',
+  nh:'output/nh/nh_actual.png', nj:'output/nj/nj_actual.png', nm:'output/nm/nm_actual.png', ny:'output/ny/ny_actual.png',
+  nc:'output/nc/nc_actual.png', nd:'output/nd/nd_actual.png', oh:'output/oh/oh_actual.png', ok:'output/ok/ok_actual.png',
+  or:'output/or/or_actual.png', pa:'output/pa/pa_actual.png', ri:'output/ri/ri_actual.png', sc:'output/sc/sc_actual.png',
+  sd:'output/sd/sd_actual.png', tn:'output/tn/tn_actual.png', tx:'output/tx/tx_actual.png', ut:'output/ut/ut_actual.png',
+  vt:'output/vt/vt_actual.png', va:'output/va/va_actual.png', wa:'output/wa/wa_actual.png', wv:'output/wv/wv_actual.png',
+  wi:'output/wi/wi_actual.png', wy:'output/wy/wy_actual.png'
+}; /* @@/ACTUAL@@ */
+
+// Working composition — user modifies this
+const comp = {};
+for (const [k,v] of Object.entries(BASE)) comp[k] = {...v};
+
+let sel = null;
+let mapIdx = 0;
+let currentItems = [];
+
+// Color scale: 0=all-R red, 0.5=even purple, 1=all-D blue
+const clr = d3.scaleLinear().domain([0,.5,1]).range(['#C0392B','#8B44AC','#3B7FC4']).clamp(true);
+const stateClr = a => { const c=comp[a]; return c ? clr(c.t>0?c.d/c.t:0) : '#3a4a60'; };
+
+function scoreboard() {
+  let d=0,r=0;
+  for (const c of Object.values(comp)) { d+=c.d; r+=c.r; }
+  document.getElementById('td').textContent = d;
+  document.getElementById('tr').textContent = r;
+}
+
+async function showPanel(abbr) {
+  sel = abbr;
+  mapIdx = 0;
+  const c = comp[abbr], lc = abbr.toLowerCase();
+  document.getElementById('ph').style.display = 'none';
+  document.getElementById('pc').style.display = 'flex';
+  document.getElementById('sn').textContent = NAMES[abbr];
+  document.getElementById('sm').textContent =
+    `${c.t} congressional seat${c.t!==1?'s':''}`;
+  const sl = document.getElementById('sl');
+  sl.max = c.t; sl.value = c.d;
+  await discoverMaps(abbr);
+  updateSliderTicks(abbr);
+  const hm = Object.keys(MAPS[lc] || {}).length > 0;
+  document.getElementById('sn').innerHTML =
+    NAMES[abbr] + (hm ? ' <span class="badge">Maps available</span>' : '');
+  refreshPanel(abbr);
+}
+
+function updateSliderTicks(abbr) {
+  const lc = abbr.toLowerCase();
+  const t = BASE[abbr].t;
+  const ticksEl = document.getElementById('sl-ticks');
+  const noteEl  = document.getElementById('sl-tick-note');
+  ticksEl.innerHTML = '';
+  const available = [...new Set([...Object.keys(MAPS[lc] || {}).map(Number), BASE[abbr].d])];
+  if (t === 0) { noteEl.style.display = 'none'; return; }
+  noteEl.style.display = 'flex';
+  for (const d of available) {
+    const tick = document.createElement('div');
+    tick.className = 'sl-tick';
+    // Align with slider thumb: thumb center travels from 9px to (100% - 9px)
+    tick.style.left = `calc(${d/t*100}% - ${d/t*18}px + 9px)`;
+    ticksEl.appendChild(tick);
+  }
+}
+
+function mapVariantLabel(path) {
+  const m = path.match(/_(\d+pct)\.png$/);
+  return m ? `Compactness ≤${m[1]}` : 'Default';
+}
+
+function refreshPanel(abbr) {
+  const c = comp[abbr], lc = abbr.toLowerCase();
+  const d=c.d, r=c.r, t=c.t;
+  const dp = t>0 ? d/t*100 : 0;
+
+  const cdEl = document.getElementById('cd');
+  const crEl = document.getElementById('cr');
+  cdEl.style.width = dp+'%'; cdEl.textContent = d>0?`${d}D`:'';
+  crEl.style.width = (100-dp)+'%'; crEl.textContent = r>0?`${r}R`:'';
+
+  document.getElementById('dv').textContent = `${d} Democrat${d!==1?'s':''}`;
+  document.getElementById('rv').textContent = `${r} Republican${r!==1?'s':''}`;
+
+  const imgEl  = document.getElementById('mi');
+  const errEl  = document.getElementById('me');
+  const capEl  = document.getElementById('cap');
+  const navEl  = document.getElementById('mnav');
+  const idxEl  = document.getElementById('midx');
+  const prevBtn = document.getElementById('mprev');
+  const nextBtn = document.getElementById('mnext');
+
+  // Actual map at the baseline D count; gerrymanders at all other D counts
+  const items = [];
+  if (d === BASE[abbr].d && ACTUAL[lc]) {
+    const actualCap = abbr === 'VA' ? '119th Congress (map preceding 2026 referendum)' : '119th Congress (enacted)';
+    items.push({src: ACTUAL[lc], cap: actualCap});
+  } else {
+    const gerrymanders = MAPS[lc]?.[d] ?? [];
+    gerrymanders.forEach(p => items.push({src: p, cap: `Gerrymandered · ${mapVariantLabel(p)}`}));
+  }
+  currentItems = items;
+
+  if (items.length > 0) {
+    mapIdx = Math.max(0, Math.min(mapIdx, items.length - 1));
+    const item = items[mapIdx];
+    imgEl.src = item.src;
+    imgEl.style.display = 'block';
+    errEl.style.display = 'none';
+    capEl.textContent = item.cap;
+    imgEl.onerror = () => {
+      imgEl.style.display='none';
+      errEl.style.display='block';
+      errEl.innerHTML='Map file not found at expected path.<br>Has it been moved?';
+      capEl.textContent='';
+      navEl.style.display='none';
+    };
+    if (items.length > 1) {
+      navEl.style.display = 'flex';
+      idxEl.textContent = `${mapIdx+1} / ${items.length}`;
+      prevBtn.disabled = mapIdx === 0;
+      nextBtn.disabled = mapIdx === items.length - 1;
+    } else {
+      navEl.style.display = 'none';
+    }
+  } else {
+    imgEl.style.display = 'none';
+    navEl.style.display = 'none';
+    errEl.style.display = 'block';
+    errEl.innerHTML = MAPS[lc]
+      ? `No map for <strong>${NAMES[abbr]}</strong> with ${d}D / ${r}R.<br><br>But perhaps I just haven't found one...`
+      : `No maps for <strong>${NAMES[abbr]}</strong> yet.<br><br>But perhaps I just haven't found one...`;
+    capEl.textContent = '';
+  }
+}
+
+document.getElementById('mprev').addEventListener('click', () => {
+  if (!sel || mapIdx <= 0) return;
+  mapIdx--;
+  refreshPanel(sel);
+});
+document.getElementById('mnext').addEventListener('click', () => {
+  if (!sel || mapIdx >= currentItems.length - 1) return;
+  mapIdx++;
+  refreshPanel(sel);
+});
+
+document.getElementById('sl').addEventListener('input', function() {
+  if (!sel) return;
+  const d = parseInt(this.value);
+  comp[sel].d = d; comp[sel].r = comp[sel].t - d;
+  mapIdx = 0;
+  refreshPanel(sel);
+  d3.select(`#s-${sel}`).attr('fill', stateClr(sel));
+  scoreboard();
+});
+
+async function runSweep(dir) {
+  const btnR = document.getElementById('sweep-r');
+  const btnD = document.getElementById('sweep-d');
+  btnR.disabled = true; btnD.disabled = true;
+  const origR = btnR.textContent, origD = btnD.textContent;
+  btnR.textContent = btnD.textContent = 'Loading…';
+
+  await Promise.all(Object.keys(BASE).map(a => discoverMaps(a)));
+
+  btnR.textContent = origR; btnD.textContent = origD;
+
+  for (const abbr of Object.keys(BASE)) {
+    const lc = abbr.toLowerCase();
+    const allKeys = [...new Set([...Object.keys(MAPS[lc] || {}).map(Number), BASE[abbr].d])];
+    const targetD = dir === 'R' ? Math.min(...allKeys) : Math.max(...allKeys);
+    comp[abbr].d = targetD;
+    comp[abbr].r = comp[abbr].t - targetD;
+    d3.select(`#s-${abbr}`).attr('fill', stateClr(abbr));
+    scoreboard();
+    if (sel === abbr) {
+      document.getElementById('sl').value = targetD;
+      refreshPanel(abbr);
+    }
+    await new Promise(res => setTimeout(res, 80));
+  }
+
+  btnR.disabled = false; btnD.disabled = false;
+}
+
+// D3 map
+const svg = d3.select('#us-map');
+svg.attr('viewBox','0 0 960 610').attr('preserveAspectRatio','xMidYMid meet');
+const proj = d3.geoAlbersUsa().scale(1280).translate([480,300]);
+const pg = d3.geoPath().projection(proj);
+
+fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json')
+  .then(r=>r.json())
+  .then(us => {
+    const features = topojson.feature(us, us.objects.states).features;
+    svg.selectAll('.s')
+      .data(features).join('path')
+      .attr('class', 's')
+      .attr('id', f => { const a=FIPS[String(f.id).padStart(2,'0')]; return a?`s-${a}`:null; })
+      .attr('fill', f => { const a=FIPS[String(f.id).padStart(2,'0')]; return a?stateClr(a):'#3a4a60'; })
+      .attr('d', pg)
+      .on('click', (evt, f) => {
+        const a = FIPS[String(f.id).padStart(2,'0')];
+        if (!a || !comp[a]) return;
+        d3.selectAll('.s').classed('sel',false);
+        d3.select(`#s-${a}`).classed('sel',true);
+        showPanel(a);
+      });
+    scoreboard();
+  })
+  .catch(() => {
+    svg.append('text').attr('x',480).attr('y',290).attr('text-anchor','middle')
+      .attr('fill','#f55').attr('font-size','14px')
+      .text('Failed to load map — requires internet connection.');
+  });
+</script>
+
+<div id="how-modal">
+  <div id="how-box">
+    <button id="how-close">&#x2715;</button>
+    <p>Click a state to change its map. When you click and drag the white dot on the slider, you change the number of Republican and Democratic seats in that state. The gerrymandered maps are generated in RStudio by an algorithm that uses the 2020 Presidential election as a guide to the partisanship of different locations.</p>
+  </div>
+</div>
+
+<script>
+const sbInfoBtn = document.getElementById('sb-info-btn');
+const sbInfoPop = document.getElementById('sb-info-pop');
+sbInfoBtn.addEventListener('click', e => { e.stopPropagation(); sbInfoPop.classList.toggle('open'); });
+document.addEventListener('click', () => sbInfoPop.classList.remove('open'));
+
+const howModal = document.getElementById('how-modal');
+document.getElementById('how-btn').addEventListener('click', () => howModal.classList.add('open'));
+document.getElementById('how-close').addEventListener('click', () => howModal.classList.remove('open'));
+howModal.addEventListener('click', e => { if (e.target === howModal) howModal.classList.remove('open'); });
+
+document.getElementById('sweep-r').addEventListener('click', () => runSweep('R'));
+document.getElementById('sweep-d').addEventListener('click', () => runSweep('D'));
+</script>
+</body>
+</html>
