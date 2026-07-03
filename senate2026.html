@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <script src="state_history.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -526,6 +527,95 @@
             max-width: 680px;
         }
 
+        /* ── STATE HISTORY MODAL ─────────────────────────── */
+
+        .sec-hint {
+            font-size: 12.5px;
+            color: var(--ink-2);
+            margin: -16px 0 16px;
+        }
+
+        .state-segment { cursor: pointer; }
+
+        .shm-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(17,24,39,0.45);
+            z-index: 300;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .shm-overlay.show { display: flex; }
+
+        .shm {
+            background: #fff;
+            border-radius: 10px;
+            max-width: 640px;
+            width: 100%;
+            padding: 20px 24px 24px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        .shm-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .shm-title {
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .shm-close {
+            border: none;
+            background: transparent;
+            font-size: 24px;
+            color: var(--ink-2);
+            cursor: pointer;
+            line-height: 1;
+            padding: 2px 4px;
+        }
+        .shm-close:hover { color: var(--ink); }
+
+        .shm-sub {
+            font-size: 12px;
+            color: var(--ink-2);
+            margin: 2px 0 14px;
+        }
+
+        .shm-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+
+        .shm-tbtn {
+            font-family: inherit;
+            font-size: 12.5px;
+            font-weight: 500;
+            padding: 5px 12px;
+            border: 1px solid var(--rule);
+            border-radius: 999px;
+            background: #fff;
+            color: var(--ink-2);
+            cursor: pointer;
+            transition: color 0.15s, background 0.15s, border-color 0.15s;
+        }
+        .shm-tbtn:hover:not(.active) { color: var(--ink); }
+        .shm-tbtn.active {
+            background: var(--ink);
+            border-color: var(--ink);
+            color: #fff;
+        }
+
+        .shm-chart { position: relative; height: 280px; }
+
+        @media (max-width: 520px) {
+            .shm { padding: 16px; }
+            .shm-chart { height: 220px; }
+        }
+
         /* ── SLIDE TRANSITIONS ───────────────────────────── */
 
         @keyframes slideInFromRight {
@@ -609,6 +699,7 @@
         <div class="sec-head">
             <span class="sec-title">Race odds by state</span>
         </div>
+        <p class="sec-hint">Click any state on the map (or any square in the bar above) to see how its odds have changed over time.</p>
         <div class="map-with-nav">
             <div class="map-wrap">
                 <svg id="map"></svg>
@@ -674,6 +765,22 @@
 </div>
 
 <div class="tt"></div>
+
+<!-- STATE HISTORY MODAL -->
+<div class="shm-overlay" id="stateModal">
+    <div class="shm">
+        <div class="shm-head">
+            <span class="shm-title" id="shmTitle"></span>
+            <button class="shm-close" id="shmClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="shm-sub" id="shmSub"></div>
+        <div class="shm-toggle">
+            <button class="shm-tbtn" id="shmJack">Jack's forecast</button>
+            <button class="shm-tbtn" id="shmBetting">Betting odds</button>
+        </div>
+        <div class="shm-chart"><canvas id="stateChart"></canvas></div>
+    </div>
+</div>
 
 <script>
     // ── DATA ─────────────────────────────────────────────────────────────────
@@ -1016,6 +1123,9 @@
                 tt.classed('show', false);
                 d3.selectAll('.state').classed('highlight', false);
             });
+            segment.addEventListener('click', function() {
+                openStateModal(state.name);
+            });
 
             stateBar.appendChild(segment);
         });
@@ -1052,6 +1162,8 @@
                 .data(topojson.feature(us,us.objects.states).features)
                 .enter().append('path').attr('class','state').attr('d',path)
                 .attr('fill', d => { const o=dataSources[currentSource].stateOdds[d.properties.name]; return o?getStateColor(o.rep):'#e5e7eb'; })
+                .style('cursor', d => dataSources.jack.stateOdds[d.properties.name] ? 'pointer' : 'default')
+                .on('click',(event,d)=>{ openStateModal(d.properties.name); })
                 .on('mouseover',(event,d)=>{
                     const name=d.properties.name, o=dataSources[currentSource].stateOdds[name];
                     document.querySelectorAll('.state-segment').forEach(s=>s.classList.toggle('highlight',s.dataset.sn===name));
@@ -1072,6 +1184,91 @@
                 .on('mouseout',()=>{ tt.classed('show',false); });
         });
     }
+
+    // ── STATE HISTORY MODAL ──────────────────────────────────────────────────
+
+    const stateHistory = (typeof STATE_HISTORY !== 'undefined') ? STATE_HISTORY : {};
+    let stateChart  = null;
+    let modalState  = null;
+    let modalSource = 'jack';
+
+    function stateHistoryFor(source, name) {
+        const h = stateHistory[source] && stateHistory[source][name];
+        if (h && h.dates && h.dates.length) return h;
+        // Fallback: single point from the current odds if no history recorded yet
+        const o = dataSources[source].stateOdds[name];
+        if (!o) return null;
+        const d = dataSources[source].dates;
+        return { dates: [d[d.length-1]], rep: [o.rep], dem: [o.dem], other: (o.other != null ? [o.other] : undefined) };
+    }
+
+    function renderStateChart() {
+        const h = stateHistoryFor(modalSource, modalState);
+        if (!h) return;
+
+        document.getElementById('shmTitle').textContent = modalState;
+        document.getElementById('shmSub').textContent = modalSource === 'jack'
+            ? "Jack's forecasted chance of winning the seat, over time"
+            : 'Betting odds from electionbettingodds.com, over time';
+        document.getElementById('shmJack').classList.toggle('active', modalSource === 'jack');
+        document.getElementById('shmBetting').classList.toggle('active', modalSource === 'betting');
+
+        const pr = h.dates.length > 60 ? 0 : 3;
+        const hasOther = h.other && h.other.some(v => v > 0);
+        const mk = (label, data, color) => ({
+            label, data, borderColor: color, backgroundColor: 'transparent',
+            borderWidth: 2, tension: 0.1, pointRadius: pr, pointHoverRadius: 5,
+            pointBackgroundColor: color, pointBorderColor: '#fff', pointBorderWidth: 1.5
+        });
+        const datasets = [ mk('Republican', h.rep, '#dc2626'), mk('Democrat', h.dem, '#1d4ed8') ];
+        if (hasOther) datasets.push(mk('Other', h.other, '#9ca3af'));
+
+        if (stateChart) stateChart.destroy();
+        stateChart = new Chart(document.getElementById('stateChart').getContext('2d'), {
+            type: 'line',
+            data: { labels: h.dates, datasets },
+            options: { animation: false, responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: {size: 12, family: 'Inter'}, color: '#6b7280' } },
+                    tooltip: { backgroundColor: '#fff', borderColor: '#e5e7eb', borderWidth: 1, titleColor: '#111827', bodyColor: '#6b7280', padding: 12, titleFont: {size: 13, weight: '600', family: 'Inter'}, bodyFont: {size: 12, family: 'Inter'},
+                        callbacks: { label: c => '  ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%' } }
+                },
+                scales: {
+                    y: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#9ca3af', font: {size: 12, family: 'Inter'}, maxTicksLimit: 6 }, grid: { color: '#f3f4f6', drawBorder: false } },
+                    x: { type: 'time', time: { tooltipFormat: 'MMM d, yyyy', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' } }, ticks: { color: '#9ca3af', font: {size: 12, family: 'Inter'}, maxTicksLimit: 7 }, grid: { display: false, drawBorder: false } }
+                }
+            }
+        });
+    }
+
+    function openStateModal(name) {
+        if (!dataSources.jack.stateOdds[name] && !dataSources.betting.stateOdds[name]) return;
+        modalState  = name;
+        modalSource = currentSource;
+        d3.select('.tt').classed('show', false);
+        document.getElementById('stateModal').classList.add('show');
+        renderStateChart();
+    }
+
+    function closeStateModal() {
+        document.getElementById('stateModal').classList.remove('show');
+        if (stateChart) { stateChart.destroy(); stateChart = null; }
+    }
+
+    document.getElementById('shmClose').addEventListener('click', closeStateModal);
+    document.getElementById('stateModal').addEventListener('click', function(e) {
+        if (e.target === this) closeStateModal();
+    });
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') closeStateModal();
+    });
+    document.getElementById('shmJack').addEventListener('click', function() {
+        if (modalSource !== 'jack') { modalSource = 'jack'; renderStateChart(); }
+    });
+    document.getElementById('shmBetting').addEventListener('click', function() {
+        if (modalSource !== 'betting') { modalSource = 'betting'; renderStateChart(); }
+    });
 
     // ── DISPLAY UPDATE ───────────────────────────────────────────────────────
 
