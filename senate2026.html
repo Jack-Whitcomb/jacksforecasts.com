@@ -1223,6 +1223,14 @@
         const datasets = [ mk('Republican', h.rep, '#dc2626'), mk('Democrat', h.dem, '#1d4ed8') ];
         if (hasOther) datasets.push(mk('Other', h.other, '#9ca3af'));
 
+        // With a single point, pad the time axis so it spans days rather than milliseconds
+        const xBounds = {};
+        if (h.dates.length < 2) {
+            const DAY = 86400000, t = new Date(h.dates[0]).getTime();
+            xBounds.min = new Date(t - 3 * DAY).toISOString().slice(0, 10);
+            xBounds.max = new Date(t + 3 * DAY).toISOString().slice(0, 10);
+        }
+
         if (stateChart) stateChart.destroy();
         stateChart = new Chart(document.getElementById('stateChart').getContext('2d'), {
             type: 'line',
@@ -1236,7 +1244,7 @@
                 },
                 scales: {
                     y: { min: 0, max: 100, ticks: { callback: v => v + '%', color: '#9ca3af', font: {size: 12, family: 'Inter'}, maxTicksLimit: 6 }, grid: { color: '#f3f4f6', drawBorder: false } },
-                    x: { type: 'time', time: { tooltipFormat: 'MMM d, yyyy', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' } }, ticks: { color: '#9ca3af', font: {size: 12, family: 'Inter'}, maxTicksLimit: 7 }, grid: { display: false, drawBorder: false } }
+                    x: { type: 'time', ...xBounds, time: { minUnit: 'day', tooltipFormat: 'MMM d, yyyy', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' } }, ticks: { color: '#9ca3af', font: {size: 12, family: 'Inter'}, maxTicksLimit: 7 }, grid: { display: false, drawBorder: false } }
                 }
             }
         });
