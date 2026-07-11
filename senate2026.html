@@ -650,6 +650,51 @@
             line-height: 1.5;
         }
 
+        .shm-polls-toggle { margin-top: 14px; }
+
+        .shm-polls-toggle summary {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink-2);
+            cursor: pointer;
+            list-style: none;
+            user-select: none;
+        }
+        .shm-polls-toggle summary::-webkit-details-marker { display: none; }
+        .shm-polls-toggle summary:hover { color: var(--ink); }
+        .shm-polls-toggle summary::before {
+            content: '▸';
+            display: inline-block;
+            margin-right: 5px;
+            font-size: 10px;
+            transition: transform 0.15s;
+        }
+        .shm-polls-toggle[open] summary::before { transform: rotate(90deg); }
+
+        .shm-polls-table-wrap {
+            margin-top: 10px;
+            max-height: 180px;
+            overflow-y: auto;
+            overflow-x: auto;
+            border: 1px solid var(--rule);
+            border-radius: 8px;
+        }
+
+        .shm-polls-table { width: 100%; border-collapse: collapse; font-size: 11.5px; white-space: nowrap; }
+        .shm-polls-table th, .shm-polls-table td { padding: 6px 10px; text-align: left; }
+        .shm-polls-table th {
+            position: sticky; top: 0;
+            background: #fafafa;
+            color: var(--ink-2);
+            font-weight: 600;
+            border-bottom: 1px solid var(--rule);
+        }
+        .shm-polls-table td { border-bottom: 1px solid #f3f4f6; color: var(--ink); }
+        .shm-polls-table tr:last-child td { border-bottom: none; }
+        .shm-polls-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+        .shm-polls-remark { font-size: 11px; font-style: italic; color: var(--ink-2); margin-top: 8px; }
+
         @media (max-width: 520px) {
             .shm { padding: 16px; }
             .shm-chart { height: 220px; }
@@ -829,6 +874,16 @@
             <div class="shm-poll-chart" id="pollChartWrap"><canvas id="pollChart"></canvas></div>
             <div class="shm-poll-empty" id="shmPollEmpty"></div>
             <div class="shm-poll-remark">The current estimate is based on prior election results and the precision of available data, weighing prior election results less heavily as election day approaches and more polls are added.</div>
+            <details class="shm-polls-toggle" id="shmPollsToggle">
+                <summary>View the polls behind this average</summary>
+                <div class="shm-polls-table-wrap">
+                    <table class="shm-polls-table">
+                        <thead><tr><th>Pollster</th><th>Dates</th><th>Sample</th><th class="num">Rep</th><th class="num">Dem</th></tr></thead>
+                        <tbody id="shmPollsTableBody"></tbody>
+                    </table>
+                </div>
+                <div class="shm-polls-remark">Data scraped from RealClearPolling.</div>
+            </details>
         </div>
     </div>
 </div>
@@ -910,28 +965,28 @@
             currentHungOdds: 0,
             stateOdds: {
                 'Alabama': { rep: 95.6, dem: 3.9 },
-                'Alaska': { rep: 44.0, dem: 56.0 },
+                'Alaska': { rep: 43.9, dem: 56.1 },
                 'Arkansas': { rep: 95.0, dem: 5.0 },
                 'Colorado': { rep: 4.6, dem: 95.3 },
                 'Delaware': { rep: 4.4, dem: 95.6 },
                 'Florida': { rep: 84.5, dem: 14.3 },
-                'Georgia': { rep: 15.8, dem: 84.2 },
+                'Georgia': { rep: 15.7, dem: 84.3 },
                 'Idaho': { rep: 95.5, dem: 4.3 },
                 'Illinois': { rep: 3.6, dem: 96.0 },
-                'Iowa': { rep: 59.5, dem: 40.5 },
+                'Iowa': { rep: 59.4, dem: 40.6 },
                 'Kansas': { rep: 95.0, dem: 5.0 },
                 'Kentucky': { rep: 92.2, dem: 6.0 },
                 'Louisiana': { rep: 92.5, dem: 7.0 },
-                'Maine': { rep: 39.1, dem: 60.9 },
+                'Maine': { rep: 39.2, dem: 60.8 },
                 'Massachusetts': { rep: 3.7, dem: 96.3 },
-                'Michigan': { rep: 29.9, dem: 70.1 },
+                'Michigan': { rep: 29.8, dem: 70.2 },
                 'Minnesota': { rep: 9.7, dem: 90.3 },
                 'Mississippi': { rep: 90.5, dem: 9.3 },
-                'Montana': { rep: 85.3, dem: 1.9 },
+                'Montana': { rep: 85.5, dem: 1.9 },
                 'Nebraska': { rep: 68.3, dem: 0.9 },
                 'New Hampshire': { rep: 17.8, dem: 82.0 },
                 'New Jersey': { rep: 4.9, dem: 93.3 },
-                'New Mexico': { rep: 4.7, dem: 94.9 },
+                'New Mexico': { rep: 4.7, dem: 95.0 },
                 'North Carolina': { rep: 14.8, dem: 85.2 },
                 'Ohio': { rep: 49.3, dem: 50.7 },
                 'Oklahoma': { rep: 94.8, dem: 4.6 },
@@ -940,7 +995,7 @@
                 'South Carolina': { rep: 88.0, dem: 11.8 },
                 'South Dakota': { rep: 94.1, dem: 5.6 },
                 'Tennessee': { rep: 94.9, dem: 3.7 },
-                'Texas': { rep: 58.7, dem: 41.3 },
+                'Texas': { rep: 58.3, dem: 41.7 },
                 'Virginia': { rep: 5.1, dem: 94.9 },
                 'West Virginia': { rep: 94.7, dem: 4.2 },
                 'Wyoming': { rep: 96.2, dem: 3.3 }
@@ -1305,6 +1360,47 @@
         renderPollingChart();
     }
 
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function fmtDate(d) {
+        return new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+
+    function fmtDateRange(start, end) {
+        if (!start || start === end) return fmtDate(end);
+        const s = new Date(start + 'T00:00:00'), e = new Date(end + 'T00:00:00');
+        if (s.getFullYear() === e.getFullYear() && s.getMonth() === e.getMonth()) {
+            return `${s.toLocaleDateString('en-US', {month:'short'})} ${s.getDate()}–${e.getDate()}, ${e.getFullYear()}`;
+        }
+        return `${s.toLocaleDateString('en-US', {month:'short', day:'numeric'})} – ${fmtDate(end)}`;
+    }
+
+    function renderPollsTable(polls) {
+        const toggle = document.getElementById('shmPollsToggle');
+        const tbody  = document.getElementById('shmPollsTableBody');
+        if (!polls || !polls.length) { toggle.style.display = 'none'; tbody.innerHTML = ''; return; }
+        toggle.style.display = '';
+        const rows = [...polls].sort((a, b) => b.end_date.localeCompare(a.end_date));
+        tbody.innerHTML = rows.map(p => `
+            <tr>
+                <td>${escapeHtml(p.pollster)}</td>
+                <td>${fmtDateRange(p.start_date, p.end_date)}</td>
+                <td>${p.sample_size != null ? p.sample_size.toLocaleString() : '—'}${p.sample_type ? ' ' + escapeHtml(p.sample_type) : ''}</td>
+                <td class="num">${p.rep.toFixed(1)}%</td>
+                <td class="num">${p.dem.toFixed(1)}%</td>
+            </tr>`).join('');
+    }
+
+    function pollDotDataset(label, data, color) {
+        return {
+            label, data, isPollDot: true, showLine: false,
+            borderColor: color, backgroundColor: color,
+            pointRadius: 3, pointHoverRadius: 5, pointStyle: 'circle', borderWidth: 1
+        };
+    }
+
     function renderPollingChart() {
         const section   = document.getElementById('shmPollSection');
         const divider   = document.getElementById('shmPollDivider');
@@ -1326,6 +1422,7 @@
             emptyEl.textContent = (p.rep_estimate != null)
                 ? `No dedicated polling for ${modalState} yet — today's estimate (R ${p.rep_estimate.toFixed(1)}% / D ${p.dem_estimate.toFixed(1)}%) relies on prior election results and the national environment.`
                 : `No polling or estimate data available for ${modalState}.`;
+            renderPollsTable(p.polls);
             return;
         }
 
@@ -1376,15 +1473,39 @@
             datasets.push(point("Today's Other estimate", otherEstSeries, '#9ca3af'));
         }
 
+        // Individual poll results included in the average -- plotted by their
+        // own end_date via {x,y} points rather than the shared `labels` index,
+        // since polls can land on any date (including before the chart's window).
+        const polls = p.polls || [];
+        const pollPoint = (poll, y) => ({
+            x: poll.end_date, y,
+            pollster: poll.pollster, sampleSize: poll.sample_size, sampleType: poll.sample_type,
+            startDate: poll.start_date, endDate: poll.end_date
+        });
+        const repPolls   = polls.filter(poll => poll.rep   != null).map(poll => pollPoint(poll, poll.rep));
+        const demPolls   = polls.filter(poll => poll.dem   != null).map(poll => pollPoint(poll, poll.dem));
+        const otherPolls = polls.filter(poll => poll.other != null).map(poll => pollPoint(poll, poll.other));
+        if (repPolls.length)              datasets.push(pollDotDataset('Rep polls', repPolls, 'rgba(220,38,38,0.4)'));
+        if (demPolls.length)              datasets.push(pollDotDataset('Dem polls', demPolls, 'rgba(29,78,216,0.4)'));
+        if (hasOther && otherPolls.length) datasets.push(pollDotDataset('Other polls', otherPolls, 'rgba(156,163,175,0.5)'));
+
         pollChart = new Chart(document.getElementById('pollChart').getContext('2d'), {
             type: 'line',
             data: { labels, datasets },
             options: { animation: false, responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
+                interaction: { mode: 'x', intersect: false },
                 plugins: {
                     legend: { display: true, labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: {size: 11, family: 'Inter'}, color: '#6b7280' } },
                     tooltip: { backgroundColor: '#fff', borderColor: '#e5e7eb', borderWidth: 1, titleColor: '#111827', bodyColor: '#6b7280', padding: 12, titleFont: {size: 13, weight: '600', family: 'Inter'}, bodyFont: {size: 12, family: 'Inter'},
-                        callbacks: { label: c => c.parsed.y == null ? undefined : '  ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%' } }
+                        callbacks: { label: c => {
+                            if (c.parsed.y == null) return undefined;
+                            if (c.dataset.isPollDot) {
+                                const r = c.raw;
+                                const party = c.dataset.label.startsWith('Rep') ? 'Rep' : (c.dataset.label.startsWith('Dem') ? 'Dem' : 'Other');
+                                return `  ${r.pollster} (${r.sampleType || 'n/a'}, n=${r.sampleSize ?? '?'}): ${party} ${c.parsed.y.toFixed(1)}%`;
+                            }
+                            return '  ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%';
+                        } } }
                 },
                 scales: {
                     y: { ticks: { callback: v => v + '%', color: '#9ca3af', font: {size: 11, family: 'Inter'}, maxTicksLimit: 6 }, grid: { color: '#f3f4f6', drawBorder: false } },
@@ -1397,6 +1518,8 @@
         if (p.rep_error != null) errParts.push(`R ${p.rep_error >= 0 ? '+' : ''}${p.rep_error.toFixed(1)}`);
         if (p.dem_error != null) errParts.push(`D ${p.dem_error >= 0 ? '+' : ''}${p.dem_error.toFixed(1)}`);
         errBadge.textContent = errParts.length ? `Est. polling error: ${errParts.join(' / ')} pts` : '';
+
+        renderPollsTable(polls);
     }
 
     function openStateModal(name) {
