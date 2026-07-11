@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <script src="state_history.js"></script>
+    <script src="state_polling.js"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -554,6 +555,8 @@
             border-radius: 10px;
             max-width: 640px;
             width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
             padding: 20px 24px 24px;
             box-shadow: 0 20px 50px rgba(0,0,0,0.25);
         }
@@ -611,9 +614,46 @@
 
         .shm-chart { position: relative; height: 280px; }
 
+        .shm-divider { height: 1px; background: var(--rule); margin: 20px 0 16px; }
+
+        .shm-poll-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .shm-poll-title { font-size: 13px; font-weight: 700; letter-spacing: -0.01em; }
+
+        .shm-poll-error-badge {
+            font-size: 11.5px;
+            font-weight: 600;
+            color: var(--ink-2);
+            white-space: nowrap;
+        }
+
+        .shm-poll-chart { position: relative; height: 220px; }
+
+        .shm-poll-empty {
+            font-size: 12.5px;
+            color: var(--ink-2);
+            padding: 10px 0 4px;
+            line-height: 1.5;
+        }
+
+        .shm-poll-remark {
+            font-size: 11.5px;
+            font-style: italic;
+            color: var(--ink-2);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
         @media (max-width: 520px) {
             .shm { padding: 16px; }
             .shm-chart { height: 220px; }
+            .shm-poll-chart { height: 190px; }
         }
 
         /* ── SLIDE TRANSITIONS ───────────────────────────── */
@@ -779,6 +819,17 @@
             <button class="shm-tbtn" id="shmBetting">Betting odds</button>
         </div>
         <div class="shm-chart"><canvas id="stateChart"></canvas></div>
+
+        <div class="shm-divider" id="shmPollDivider"></div>
+        <div class="shm-poll-section" id="shmPollSection">
+            <div class="shm-poll-head">
+                <span class="shm-poll-title">Polling average over time</span>
+                <span class="shm-poll-error-badge" id="shmPollErrorBadge"></span>
+            </div>
+            <div class="shm-poll-chart" id="pollChartWrap"><canvas id="pollChart"></canvas></div>
+            <div class="shm-poll-empty" id="shmPollEmpty"></div>
+            <div class="shm-poll-remark">The current estimate is based on prior election results and the precision of available data, weighing prior election results less heavily as election day approaches and more polls are added.</div>
+        </div>
     </div>
 </div>
 
@@ -860,38 +911,38 @@
             stateOdds: {
                 'Alabama': { rep: 95.6, dem: 3.9 },
                 'Alaska': { rep: 44.0, dem: 56.0 },
-                'Arkansas': { rep: 95.1, dem: 4.9 },
+                'Arkansas': { rep: 95.0, dem: 5.0 },
                 'Colorado': { rep: 4.6, dem: 95.3 },
                 'Delaware': { rep: 4.4, dem: 95.6 },
                 'Florida': { rep: 84.5, dem: 14.3 },
-                'Georgia': { rep: 15.7, dem: 84.3 },
+                'Georgia': { rep: 15.8, dem: 84.2 },
                 'Idaho': { rep: 95.5, dem: 4.3 },
                 'Illinois': { rep: 3.6, dem: 96.0 },
                 'Iowa': { rep: 59.5, dem: 40.5 },
-                'Kansas': { rep: 95.1, dem: 4.9 },
-                'Kentucky': { rep: 92.0, dem: 6.0 },
+                'Kansas': { rep: 95.0, dem: 5.0 },
+                'Kentucky': { rep: 92.2, dem: 6.0 },
                 'Louisiana': { rep: 92.5, dem: 7.0 },
-                'Maine': { rep: 39.3, dem: 60.7 },
+                'Maine': { rep: 39.1, dem: 60.9 },
                 'Massachusetts': { rep: 3.7, dem: 96.3 },
-                'Michigan': { rep: 30.1, dem: 69.9 },
+                'Michigan': { rep: 29.9, dem: 70.1 },
                 'Minnesota': { rep: 9.7, dem: 90.3 },
                 'Mississippi': { rep: 90.5, dem: 9.3 },
-                'Montana': { rep: 87.0, dem: 1.9 },
+                'Montana': { rep: 85.3, dem: 1.9 },
                 'Nebraska': { rep: 68.3, dem: 0.9 },
                 'New Hampshire': { rep: 17.8, dem: 82.0 },
                 'New Jersey': { rep: 4.9, dem: 93.3 },
-                'New Mexico': { rep: 4.8, dem: 94.9 },
+                'New Mexico': { rep: 4.7, dem: 94.9 },
                 'North Carolina': { rep: 14.8, dem: 85.2 },
-                'Ohio': { rep: 49.2, dem: 50.8 },
+                'Ohio': { rep: 49.3, dem: 50.7 },
                 'Oklahoma': { rep: 94.8, dem: 4.6 },
                 'Oregon': { rep: 5.3, dem: 94.7 },
                 'Rhode Island': { rep: 4.8, dem: 94.8 },
                 'South Carolina': { rep: 88.0, dem: 11.8 },
-                'South Dakota': { rep: 93.9, dem: 5.6 },
+                'South Dakota': { rep: 94.1, dem: 5.6 },
                 'Tennessee': { rep: 94.9, dem: 3.7 },
                 'Texas': { rep: 58.7, dem: 41.3 },
                 'Virginia': { rep: 5.1, dem: 94.9 },
-                'West Virginia': { rep: 94.8, dem: 4.2 },
+                'West Virginia': { rep: 94.7, dem: 4.2 },
                 'Wyoming': { rep: 96.2, dem: 3.3 }
             }
         }
@@ -1188,7 +1239,9 @@
     // ── STATE HISTORY MODAL ──────────────────────────────────────────────────
 
     const stateHistory = (typeof STATE_HISTORY !== 'undefined') ? STATE_HISTORY : {};
+    const statePolling = (typeof STATE_POLLING !== 'undefined') ? STATE_POLLING : {};
     let stateChart  = null;
+    let pollChart   = null;
     let modalState  = null;
     let modalSource = 'jack';
 
@@ -1248,6 +1301,102 @@
                 }
             }
         });
+
+        renderPollingChart();
+    }
+
+    function renderPollingChart() {
+        const section   = document.getElementById('shmPollSection');
+        const divider   = document.getElementById('shmPollDivider');
+        const chartWrap = document.getElementById('pollChartWrap');
+        const emptyEl   = document.getElementById('shmPollEmpty');
+        const errBadge  = document.getElementById('shmPollErrorBadge');
+        const p = statePolling[modalState];
+
+        if (pollChart) { pollChart.destroy(); pollChart = null; }
+
+        if (!p) { section.style.display = 'none'; divider.style.display = 'none'; return; }
+        section.style.display = '';
+        divider.style.display = '';
+
+        if (!p.dates || !p.dates.length) {
+            chartWrap.style.display = 'none';
+            errBadge.textContent = '';
+            emptyEl.style.display = '';
+            emptyEl.textContent = (p.rep_estimate != null)
+                ? `No dedicated polling for ${modalState} yet — today's estimate (R ${p.rep_estimate.toFixed(1)}% / D ${p.dem_estimate.toFixed(1)}%) relies on prior election results and the national environment.`
+                : `No polling or estimate data available for ${modalState}.`;
+            return;
+        }
+
+        chartWrap.style.display = '';
+        emptyEl.style.display = 'none';
+
+        const hasOther = (p.other_avg || []).some(v => v > 0);
+
+        // Append a slot for "today" if the estimate falls on a date not already
+        // present in the polling-average series (e.g. today's average hasn't
+        // been generated yet even though an estimate has).
+        const labels = p.dates.slice();
+        let todayIdx = labels.indexOf(p.today_date);
+        if (todayIdx === -1 && p.today_date) { labels.push(p.today_date); todayIdx = labels.length - 1; }
+
+        const pad = arr => { const a = (arr || []).slice(); while (a.length < labels.length) a.push(null); return a; };
+        const repAvgSeries   = pad(p.rep_avg);
+        const demAvgSeries   = pad(p.dem_avg);
+        const otherAvgSeries = pad(p.other_avg);
+
+        const repEstSeries   = new Array(labels.length).fill(null);
+        const demEstSeries   = new Array(labels.length).fill(null);
+        const otherEstSeries = new Array(labels.length).fill(null);
+        if (todayIdx !== -1 && p.rep_estimate != null) {
+            repEstSeries[todayIdx]   = p.rep_estimate;
+            demEstSeries[todayIdx]   = p.dem_estimate;
+            if (hasOther) otherEstSeries[todayIdx] = p.other_estimate;
+        }
+
+        const line = (label, data, color) => ({
+            label, data, borderColor: color, backgroundColor: 'transparent',
+            borderWidth: 2, tension: 0.1, pointRadius: 0, pointHoverRadius: 4, spanGaps: true
+        });
+        const point = (label, data, color) => ({
+            label, data, showLine: false, borderColor: color, backgroundColor: color,
+            pointRadius: 6, pointHoverRadius: 7, pointStyle: 'rectRot',
+            borderWidth: 1.5, pointBorderColor: '#fff'
+        });
+
+        const datasets = [
+            line('Rep polling avg', repAvgSeries, '#dc2626'),
+            line('Dem polling avg', demAvgSeries, '#1d4ed8'),
+            point("Today's Rep estimate", repEstSeries, '#dc2626'),
+            point("Today's Dem estimate", demEstSeries, '#1d4ed8')
+        ];
+        if (hasOther) {
+            datasets.push(line('Other polling avg', otherAvgSeries, '#9ca3af'));
+            datasets.push(point("Today's Other estimate", otherEstSeries, '#9ca3af'));
+        }
+
+        pollChart = new Chart(document.getElementById('pollChart').getContext('2d'), {
+            type: 'line',
+            data: { labels, datasets },
+            options: { animation: false, responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: true, labels: { boxWidth: 10, boxHeight: 10, usePointStyle: true, font: {size: 11, family: 'Inter'}, color: '#6b7280' } },
+                    tooltip: { backgroundColor: '#fff', borderColor: '#e5e7eb', borderWidth: 1, titleColor: '#111827', bodyColor: '#6b7280', padding: 12, titleFont: {size: 13, weight: '600', family: 'Inter'}, bodyFont: {size: 12, family: 'Inter'},
+                        callbacks: { label: c => c.parsed.y == null ? undefined : '  ' + c.dataset.label + ': ' + c.parsed.y.toFixed(1) + '%' } }
+                },
+                scales: {
+                    y: { ticks: { callback: v => v + '%', color: '#9ca3af', font: {size: 11, family: 'Inter'}, maxTicksLimit: 6 }, grid: { color: '#f3f4f6', drawBorder: false } },
+                    x: { type: 'time', time: { minUnit: 'day', tooltipFormat: 'MMM d, yyyy', displayFormats: { day: 'MMM d', week: 'MMM d', month: 'MMM yyyy' } }, ticks: { color: '#9ca3af', font: {size: 11, family: 'Inter'}, maxTicksLimit: 6 }, grid: { display: false, drawBorder: false } }
+                }
+            }
+        });
+
+        const errParts = [];
+        if (p.rep_error != null) errParts.push(`R ${p.rep_error >= 0 ? '+' : ''}${p.rep_error.toFixed(1)}`);
+        if (p.dem_error != null) errParts.push(`D ${p.dem_error >= 0 ? '+' : ''}${p.dem_error.toFixed(1)}`);
+        errBadge.textContent = errParts.length ? `Est. polling error: ${errParts.join(' / ')} pts` : '';
     }
 
     function openStateModal(name) {
@@ -1262,6 +1411,7 @@
     function closeStateModal() {
         document.getElementById('stateModal').classList.remove('show');
         if (stateChart) { stateChart.destroy(); stateChart = null; }
+        if (pollChart)  { pollChart.destroy();  pollChart  = null; }
     }
 
     document.getElementById('shmClose').addEventListener('click', closeStateModal);
