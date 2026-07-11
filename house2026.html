@@ -495,7 +495,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="chart-col-sub">Bias-adjusted point forecast · shaded band = 95% CI for final vote shares · dots = individual polls</div>
+                <div class="chart-col-sub">Bias-adjusted point forecast · shaded band = 95% CI for final vote shares</div>
                 <div class="chart-area">
                     <canvas id="voteChart"></canvas>
                 </div>
@@ -746,7 +746,7 @@ const sharedTooltip = {
     bodyFont: { size: 12, family: 'Inter' }
 };
 
-// ── POLL DOTS + POLLING DATA TABLE (RealClearPolling) ─────────────────────────
+// ── POLLING DATA TABLE (RealClearPolling) ──────────────────────────────────
 
 function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -764,22 +764,6 @@ function fmtDateRange(start, end) {
     }
     return `${s.toLocaleDateString('en-US', {month:'short', day:'numeric'})} – ${fmtDate(end)}`;
 }
-
-function pollDotDataset(label, data, color) {
-    return {
-        label, data, isPollDot: true, showLine: false,
-        borderColor: color, backgroundColor: color,
-        pointRadius: 3, pointHoverRadius: 5, pointStyle: 'circle', borderWidth: 1
-    };
-}
-
-const pollPoint = (p, y) => ({
-    x: p.end_date, y,
-    pollster: p.pollster, sampleSize: p.sample_size, sampleType: p.sample_type,
-    startDate: p.start_date, endDate: p.end_date
-});
-const demPollPoints = GENERIC_POLLS.map(p => pollPoint(p, p.dem));
-const repPollPoints = GENERIC_POLLS.map(p => pollPoint(p, p.rep));
 
 function renderPollsTable() {
     const tbody = document.getElementById('pollsTableBody');
@@ -812,10 +796,7 @@ new Chart(document.getElementById('voteChart').getContext('2d'), {
             { data: REP_LO, borderWidth: 0, fill: '+1', backgroundColor: 'rgba(220,38,38,0.10)', pointRadius: 0, tension: 0.2 },
             { data: REP_HI, borderWidth: 0, fill: false, pointRadius: 0, tension: 0.2 },
             // Rep forecast line
-            { label: 'Republicans', data: REP_FC, borderColor: '#dc2626', borderWidth: 2.5, fill: false, pointRadius: 0, tension: 0.2, pointHoverRadius: 5, pointBackgroundColor: '#dc2626', pointBorderColor: '#fff', pointBorderWidth: 2 },
-            // Individual poll results included in the average
-            pollDotDataset('Dem polls', demPollPoints, 'rgba(29,78,216,0.4)'),
-            pollDotDataset('Rep polls', repPollPoints, 'rgba(220,38,38,0.4)')
+            { label: 'Republicans', data: REP_FC, borderColor: '#dc2626', borderWidth: 2.5, fill: false, pointRadius: 0, tension: 0.2, pointHoverRadius: 5, pointBackgroundColor: '#dc2626', pointBorderColor: '#fff', pointBorderWidth: 2 }
         ]
     },
     options: {
@@ -827,14 +808,9 @@ new Chart(document.getElementById('voteChart').getContext('2d'), {
             legend: { display: false },
             tooltip: {
                 ...sharedTooltip,
-                filter: item => item.datasetIndex === 2 || item.datasetIndex === 5 || item.dataset.isPollDot,
+                filter: item => item.datasetIndex === 2 || item.datasetIndex === 5,
                 callbacks: {
                     label: ctx => {
-                        if (ctx.dataset.isPollDot) {
-                            const r = ctx.raw;
-                            const party = ctx.dataset.label === 'Dem polls' ? 'Dem' : 'Rep';
-                            return `  ${r.pollster} (${r.sampleType || 'n/a'}, n=${r.sampleSize ?? '?'}): ${party} ${ctx.parsed.y.toFixed(1)}%`;
-                        }
                         const i   = ctx.dataIndex;
                         const isDem = ctx.datasetIndex === 2;
                         const lo  = isDem ? DEM_LO[i] : REP_LO[i];
