@@ -553,7 +553,7 @@
         .shm {
             background: #fff;
             border-radius: 10px;
-            max-width: 640px;
+            max-width: 720px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -650,11 +650,20 @@
             line-height: 1.5;
         }
 
-        .shm-polls-toggle { margin-top: 14px; }
+        .shm-polls-toggle {
+            margin-top: 10px;
+            padding-top: 16px;
+            border-top: 1px solid var(--rule);
+        }
 
         .shm-polls-toggle summary {
-            font-size: 11.5px;
-            font-weight: 600;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
             color: var(--ink-2);
             cursor: pointer;
             list-style: none;
@@ -665,35 +674,64 @@
         .shm-polls-toggle summary::before {
             content: '▸';
             display: inline-block;
-            margin-right: 5px;
             font-size: 10px;
             transition: transform 0.15s;
         }
         .shm-polls-toggle[open] summary::before { transform: rotate(90deg); }
+        .shm-polls-toggle-count {
+            font-weight: 500;
+            letter-spacing: normal;
+            text-transform: none;
+            color: #9ca3af;
+        }
 
         .shm-polls-table-wrap {
-            margin-top: 10px;
-            max-height: 180px;
+            margin-top: 12px;
+            max-height: 260px;
             overflow-y: auto;
             overflow-x: auto;
             border: 1px solid var(--rule);
-            border-radius: 8px;
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(17,24,39,0.03);
         }
 
-        .shm-polls-table { width: 100%; border-collapse: collapse; font-size: 11.5px; white-space: nowrap; }
-        .shm-polls-table th, .shm-polls-table td { padding: 6px 10px; text-align: left; }
+        .shm-polls-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .shm-polls-table th, .shm-polls-table td { padding: 8px 12px; text-align: left; }
         .shm-polls-table th {
             position: sticky; top: 0;
             background: #fafafa;
             color: var(--ink-2);
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 10px;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
             border-bottom: 1px solid var(--rule);
+            white-space: nowrap;
         }
         .shm-polls-table td { border-bottom: 1px solid #f3f4f6; color: var(--ink); }
-        .shm-polls-table tr:last-child td { border-bottom: none; }
-        .shm-polls-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+        .shm-polls-table td.pollster { font-weight: 600; }
+        .shm-polls-table td.dates, .shm-polls-table td.sample { color: var(--ink-2); white-space: nowrap; }
+        .shm-polls-table tbody tr:last-child td { border-bottom: none; }
+        .shm-polls-table tbody tr:nth-child(even) { background: #fafbfc; }
+        .shm-polls-table tbody tr:hover { background: var(--dem-bg); }
+        .shm-polls-table td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .shm-polls-table td.num.rep-num { color: var(--rep); font-weight: 600; }
+        .shm-polls-table td.num.dem-num { color: var(--dem); font-weight: 600; }
+        .shm-polls-table td.margin, .shm-polls-table th.margin { text-align: right; white-space: nowrap; }
 
-        .shm-polls-remark { font-size: 11px; font-style: italic; color: var(--ink-2); margin-top: 8px; }
+        .shm-poll-margin-pill {
+            display: inline-block;
+            padding: 2px 9px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+        .shm-poll-margin-pill.dem { background: var(--dem-bg); color: var(--dem); }
+        .shm-poll-margin-pill.rep { background: var(--rep-bg); color: var(--rep); }
+        .shm-poll-margin-pill.even { background: #f3f4f6; color: var(--ink-2); }
+
+        .shm-polls-remark { font-size: 11px; font-style: italic; color: var(--ink-2); margin-top: 10px; }
 
         @media (max-width: 520px) {
             .shm { padding: 16px; }
@@ -875,10 +913,10 @@
             <div class="shm-poll-empty" id="shmPollEmpty"></div>
             <div class="shm-poll-remark">The current estimate is based on prior election results and the precision of available data, weighing prior election results less heavily as election day approaches and more polls are added.</div>
             <details class="shm-polls-toggle" id="shmPollsToggle">
-                <summary>View the polls behind this average</summary>
+                <summary>View the polls behind this average <span class="shm-polls-toggle-count" id="shmPollsToggleCount"></span></summary>
                 <div class="shm-polls-table-wrap">
                     <table class="shm-polls-table">
-                        <thead><tr><th>Pollster</th><th>Dates</th><th>Sample</th><th class="num">Rep</th><th class="num">Dem</th></tr></thead>
+                        <thead><tr><th>Pollster</th><th>Field dates</th><th>Sample</th><th class="num">Rep</th><th class="num">Dem</th><th class="margin">Margin</th></tr></thead>
                         <tbody id="shmPollsTableBody"></tbody>
                     </table>
                 </div>
@@ -957,9 +995,9 @@
         // BEGIN_BETTING_DATA
         betting: {
             author: "odds from electionbettingodds.com",
-            dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-05", "2026-04-12", "2026-04-19", "2026-04-26", "2026-05-03", "2026-05-10", "2026-05-17", "2026-05-24", "2026-05-31", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19"],
-            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5, 51.0, 49.2, 47.1, 48.0, 47.0, 48.0, 49.8, 53.5, 54.2, 52.4, 55.4, 55.1, 55.1, 57.0, 57.5, 57.1, 54.9, 56.3],
-            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5, 49.0, 50.8, 52.9, 52.0, 53.0, 52.0, 50.2, 46.5, 45.8, 47.6, 44.6, 44.9, 44.9, 43.0, 42.5, 42.9, 45.1, 43.7],
+            dates: ["2024-11-16", "2024-11-23", "2024-11-30", "2024-12-07", "2024-12-14", "2024-12-21", "2024-12-28", "2025-01-04", "2025-01-11", "2025-01-18", "2025-01-27", "2025-02-03", "2025-02-10", "2025-02-17", "2025-02-24", "2025-03-03", "2025-03-10", "2025-03-17", "2025-03-24", "2025-03-31", "2025-04-07", "2025-04-14", "2025-05-05", "2025-05-12", "2025-05-19", "2025-05-26", "2025-06-02", "2025-06-09", "2025-06-16", "2025-06-23", "2025-06-30", "2025-07-07", "2025-07-14", "2025-07-21", "2025-07-28", "2025-08-04", "2025-08-17", "2025-08-24", "2025-08-31", "2025-09-07", "2025-09-14", "2025-09-21", "2025-09-28", "2025-10-05", "2025-10-12", "2025-10-19", "2025-10-26", "2025-11-02", "2025-11-09", "2025-11-16", "2025-11-23", "2025-11-30", "2025-12-07", "2025-12-14", "2025-12-21", "2025-12-28", "2026-01-04", "2026-01-11", "2026-01-18", "2026-01-25", "2026-02-01", "2026-02-08", "2026-02-15", "2026-02-22", "2026-03-01", "2026-03-08", "2026-03-15", "2026-03-22", "2026-03-29", "2026-04-05", "2026-04-12", "2026-04-19", "2026-04-26", "2026-05-03", "2026-05-10", "2026-05-17", "2026-05-24", "2026-05-31", "2026-06-07", "2026-06-14", "2026-06-21", "2026-06-28", "2026-07-05", "2026-07-12", "2026-07-19", "2026-07-20"],
+            republicanOdds: [81.5, 83.0, 82.5, 82.4, 81.7, 81.7, 81.7, 81.7, 81.2, 81.2, 81.6, 81.6, 82.0, 82.0, 81.6, 81.5, 81.5, 81.5, 82.0, 80.6, 70.8, 69.5, 69.5, 68.5, 69.5, 70.4, 70.5, 70.5, 71.5, 70.9, 72.2, 71.5, 71.6, 70.8, 70.8, 71.2, 70.5, 70.5, 70.5, 70.8, 70.8, 70.8, 70.8, 70.8, 70.5, 70.8, 72.5, 72.5, 71.5, 71.5, 71.5, 71.2, 67.5, 67.5, 67.5, 67.5, 68.2, 66.5, 66.5, 66.5, 65.2, 63.5, 60.5, 59.5, 59.5, 56.5, 49.5, 51.0, 49.2, 47.1, 48.0, 47.0, 48.0, 49.8, 53.5, 54.2, 52.4, 55.4, 55.1, 55.1, 57.0, 57.5, 57.1, 54.9, 56.3, 56.3],
+            democraticOdds: [18.5, 17.0, 17.5, 17.6, 18.3, 18.3, 18.3, 18.3, 18.8, 18.8, 18.4, 18.4, 18.0, 18.0, 18.4, 18.5, 18.5, 18.5, 18.0, 19.4, 29.2, 30.5, 30.5, 31.5, 30.5, 29.6, 29.5, 29.5, 28.5, 29.1, 27.8, 28.5, 28.4, 29.2, 29.2, 28.8, 29.5, 29.5, 29.5, 29.2, 29.2, 29.2, 29.2, 29.2, 29.5, 29.2, 27.5, 27.5, 28.5, 28.5, 28.5, 28.8, 32.5, 32.5, 32.5, 32.5, 31.8, 33.5, 33.5, 33.5, 34.8, 36.5, 39.5, 40.5, 40.5, 43.5, 50.5, 49.0, 50.8, 52.9, 52.0, 53.0, 52.0, 50.2, 46.5, 45.8, 47.6, 44.6, 44.9, 44.9, 43.0, 42.5, 42.9, 45.1, 43.7, 43.7],
             currentOdds: 56.3,
             currentDemOdds: 43.7,
             currentHungOdds: 0,
@@ -970,35 +1008,35 @@
                 'Colorado': { rep: 4.6, dem: 95.2 },
                 'Delaware': { rep: 4.4, dem: 95.6 },
                 'Florida': { rep: 85.3, dem: 14.7 },
-                'Georgia': { rep: 14.8, dem: 85.2 },
-                'Idaho': { rep: 95.9, dem: 3.9 },
+                'Georgia': { rep: 14.4, dem: 85.6 },
+                'Idaho': { rep: 95.7, dem: 3.9 },
                 'Illinois': { rep: 4.7, dem: 95.3 },
-                'Iowa': { rep: 62.4, dem: 37.6 },
+                'Iowa': { rep: 62.5, dem: 37.5 },
                 'Kansas': { rep: 93.1, dem: 4.9 },
                 'Kentucky': { rep: 92.2, dem: 7.8 },
                 'Louisiana': { rep: 92.7, dem: 7.0 },
-                'Maine': { rep: 35.5, dem: 64.5 },
+                'Maine': { rep: 35.0, dem: 65.0 },
                 'Massachusetts': { rep: 3.7, dem: 95.3 },
-                'Michigan': { rep: 29.0, dem: 70.7 },
-                'Minnesota': { rep: 9.2, dem: 90.7 },
+                'Michigan': { rep: 29.7, dem: 70.3 },
+                'Minnesota': { rep: 9.5, dem: 90.5 },
                 'Mississippi': { rep: 90.7, dem: 9.3 },
-                'Montana': { rep: 86.3, dem: 3.1 },
-                'Nebraska': { rep: 72.7, dem: 0.7 },
-                'New Hampshire': { rep: 17.3, dem: 82.3 },
+                'Montana': { rep: 86.8, dem: 2.4 },
+                'Nebraska': { rep: 72.3, dem: 0.7 },
+                'New Hampshire': { rep: 17.8, dem: 82.2 },
                 'New Jersey': { rep: 4.7, dem: 93.0 },
                 'New Mexico': { rep: 4.1, dem: 94.7 },
-                'North Carolina': { rep: 14.5, dem: 85.5 },
-                'Ohio': { rep: 49.8, dem: 50.2 },
+                'North Carolina': { rep: 14.4, dem: 85.6 },
+                'Ohio': { rep: 49.9, dem: 50.1 },
                 'Oklahoma': { rep: 94.0, dem: 4.5 },
                 'Oregon': { rep: 4.8, dem: 95.2 },
                 'Rhode Island': { rep: 4.3, dem: 95.1 },
-                'South Carolina': { rep: 84.2, dem: 15.8 },
+                'South Carolina': { rep: 84.9, dem: 15.1 },
                 'South Dakota': { rep: 94.1, dem: 5.0 },
                 'Tennessee': { rep: 94.8, dem: 3.1 },
-                'Texas': { rep: 58.1, dem: 41.9 },
+                'Texas': { rep: 58.5, dem: 41.5 },
                 'Virginia': { rep: 4.7, dem: 95.2 },
                 'West Virginia': { rep: 95.1, dem: 4.0 },
-                'Wyoming': { rep: 95.6, dem: 3.4 }
+                'Wyoming': { rep: 95.6, dem: 3.3 }
             }
         }
         // END_BETTING_DATA
@@ -1377,20 +1415,31 @@
         return `${s.toLocaleDateString('en-US', {month:'short', day:'numeric'})} – ${fmtDate(end)}`;
     }
 
+    function shmMarginPillHtml(rep, dem) {
+        const m = dem - rep;
+        if (Math.abs(m) < 0.05) return `<span class="shm-poll-margin-pill even">Even</span>`;
+        const party = m > 0 ? 'dem' : 'rep';
+        const letter = m > 0 ? 'D' : 'R';
+        return `<span class="shm-poll-margin-pill ${party}">${letter}+${Math.abs(m).toFixed(1)}</span>`;
+    }
+
     function renderPollsTable(polls) {
-        const toggle = document.getElementById('shmPollsToggle');
-        const tbody  = document.getElementById('shmPollsTableBody');
+        const toggle   = document.getElementById('shmPollsToggle');
+        const tbody    = document.getElementById('shmPollsTableBody');
+        const countEl  = document.getElementById('shmPollsToggleCount');
         if (!polls || !polls.length) { toggle.style.display = 'none'; tbody.innerHTML = ''; return; }
         toggle.style.display = '';
         const rows = [...polls].sort((a, b) => b.end_date.localeCompare(a.end_date));
         tbody.innerHTML = rows.map(p => `
             <tr>
-                <td>${escapeHtml(p.pollster)}</td>
-                <td>${fmtDateRange(p.start_date, p.end_date)}</td>
-                <td>${p.sample_size != null ? p.sample_size.toLocaleString() : '—'}${p.sample_type ? ' ' + escapeHtml(p.sample_type) : ''}</td>
-                <td class="num">${p.rep.toFixed(1)}%</td>
-                <td class="num">${p.dem.toFixed(1)}%</td>
+                <td class="pollster">${escapeHtml(p.pollster)}</td>
+                <td class="dates">${fmtDateRange(p.start_date, p.end_date)}</td>
+                <td class="sample">${p.sample_size != null ? p.sample_size.toLocaleString() : '—'}${p.sample_type ? ' ' + escapeHtml(p.sample_type) : ''}</td>
+                <td class="num rep-num">${p.rep.toFixed(1)}%</td>
+                <td class="num dem-num">${p.dem.toFixed(1)}%</td>
+                <td class="margin">${shmMarginPillHtml(p.rep, p.dem)}</td>
             </tr>`).join('');
+        if (countEl) countEl.textContent = `(${rows.length})`;
     }
 
     function pollDotDataset(label, data, color) {
