@@ -1181,7 +1181,7 @@
 
     function updateChart(source) {
         const d=dataSources[source], isJ=source==='jack';
-        const al=isJ?['2026-03-10','2026-03-13','2026-03-16']:[];
+        const al=isJ?['2026-03-10','2026-03-13','2026-03-16','2026-08-09']:[];
         if (chart) {
             const sn=[0,1,2,3,4].map(i=>[...chart.data.datasets[i].data]);
             const tg=[d._cr,d._cd2,d._ch,d._hr,d._hd];
