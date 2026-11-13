@@ -503,6 +503,8 @@
             color: var(--ink-2);
         }
         .pe-scroll { overflow-x: auto; }
+        .pe-link { color: inherit; text-decoration: none; border-bottom: 1px dotted #d1d5db; }
+        .pe-link:hover { color: var(--ink); border-bottom-color: currentColor; }
         .pe-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
         .pe-table th {
             text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
@@ -940,7 +942,7 @@
             <div class="bb-sub">Final estimates of the margin and how many points they missed the final result by</div>
             <div class="pe-scroll">
                 <table class="pe-table">
-                    <thead><tr><th>State</th><th>Result</th><th>Jack's final forecast</th><th>RCP average</th><th>Theo (Nov 5 run)</th></tr></thead>
+                    <thead><tr><th>State</th><th>Result</th><th>Jack's final forecast</th><th>RCP average</th><th><a class="pe-link" href="https://theoelections.com/national.html" target="_blank" rel="noopener">Theo</a> (Nov 5 run)</th></tr></thead>
                     <tbody>
                     <tr><td>Florida</td><td>R+2.9</td><td>R+7.0<span class="pe-off">off by 4.1</span><span class="pe-rank r3">3</span></td><td>R+6.3<span class="pe-off">off by 3.4</span><span class="pe-rank r2">2</span></td><td>R+4.1<span class="pe-off">off by 1.2</span><span class="pe-rank r1">1</span></td></tr>
                     <tr><td>Georgia</td><td>D+18.0</td><td>D+5.9<span class="pe-off">off by 12.1</span><span class="pe-rank r3">3</span></td><td>D+8.6<span class="pe-off">off by 9.4</span><span class="pe-rank r2">2</span></td><td>D+8.9<span class="pe-off">off by 9.1</span><span class="pe-rank r1">1</span></td></tr>
