@@ -493,6 +493,36 @@
             counter-increment: bb;
         }
         .bb-list li:first-child { border-top: none; }
+        .pe-board {
+            margin: 20px 0 8px;
+            max-width: 860px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 14px 16px 10px;
+            background: #fff;
+            color: var(--ink-2);
+        }
+        .pe-scroll { overflow-x: auto; }
+        .pe-table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+        .pe-table th {
+            text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 0.06em;
+            text-transform: uppercase; color: #9ca3af; padding: 4px 10px 6px 0;
+            border-bottom: 1px solid var(--rule); white-space: nowrap;
+        }
+        .pe-table td { padding: 5px 10px 5px 0; border-top: 1px solid #f3f4f6; white-space: nowrap; }
+        .pe-table tr:first-child td { border-top: none; }
+        .pe-table td:nth-child(n+3), .pe-table th:nth-child(n+3) { width: 30%; }
+        .pe-off { color: #9ca3af; font-size: 12px; font-weight: 400; margin-left: 8px; }
+        .pe-big .pe-off { color: #b91c1c; font-weight: 600; }
+        .pe-big { color: var(--ink); }
+        .pe-tag {
+            display: inline-block; margin-left: 8px; padding: 0 6px;
+            font-size: 10px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+            color: #b91c1c; background: #fef2f2; border-radius: 3px; vertical-align: 1px;
+        }
+        .pe-avg td { border-top: 1px solid var(--rule); font-weight: 700; color: var(--ink); }
+        .pe-avg td.pe-big { color: #b91c1c; }
+        .pe-avg td { font-size: 13px; }
         .bb-rank { color: #9ca3af; font-weight: 400; margin-right: 5px; }
         .bb-val { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
         .bb-me .bb-name, .bb-me .bb-val { color: var(--ink); font-weight: 700; }
@@ -903,6 +933,33 @@
                     <li><span class="bb-name"><span class="bb-rank">T1.</span><a href="https://theoelections.com/national.html" target="_blank" rel="noopener">Theo</a></span><span class="bb-val">2</span></li>
                     <li class="bb-me"><span class="bb-name"><span class="bb-rank">T1.</span>Jack's model</span><span class="bb-val">2</span></li>
                 </ol>
+            </div>
+        </div>
+        <div class="pe-board">
+            <div class="bb-title">Polling error: Jack's model vs. RealClearPolling</div>
+            <div class="bb-sub">Final estimates of the margin and how many points they missed the final result by</div>
+            <div class="pe-scroll">
+                <table class="pe-table">
+                    <thead><tr><th>State</th><th>Result</th><th>Jack's final forecast</th><th>RCP average</th></tr></thead>
+                    <tbody>
+                    <tr><td>Florida</td><td>R+2.9</td><td class="pe-big">R+7.0<span class="pe-off">off by 4.1</span><span class="pe-tag">Larger miss</span></td><td class="">R+6.3<span class="pe-off">off by 3.4</span></td></tr>
+                    <tr><td>Georgia</td><td>D+18.0</td><td class="pe-big">D+5.9<span class="pe-off">off by 12.1</span><span class="pe-tag">Larger miss</span></td><td class="">D+8.6<span class="pe-off">off by 9.4</span></td></tr>
+                    <tr><td>Iowa</td><td>D+4.2</td><td class="pe-big">R+0.8<span class="pe-off">off by 5.0</span><span class="pe-tag">Larger miss</span></td><td class="">Tie<span class="pe-off">off by 4.2</span></td></tr>
+                    <tr><td>Kansas</td><td>D+5.0</td><td class="pe-big">D+2.1<span class="pe-off">off by 2.9</span><span class="pe-tag">Larger miss</span></td><td class="">D+4.1<span class="pe-off">off by 0.9</span></td></tr>
+                    <tr><td>Maine</td><td>D+6.1</td><td class="pe-big">D+2.3<span class="pe-off">off by 3.8</span><span class="pe-tag">Larger miss</span></td><td class="">D+3.6<span class="pe-off">off by 2.5</span></td></tr>
+                    <tr><td>Massachusetts</td><td>D+31.3</td><td class="pe-big">D+22.6<span class="pe-off">off by 8.7</span><span class="pe-tag">Larger miss</span></td><td class="">D+26.2<span class="pe-off">off by 5.1</span></td></tr>
+                    <tr><td>Michigan</td><td>D+7.0</td><td class="pe-big">D+2.8<span class="pe-off">off by 4.2</span><span class="pe-tag">Larger miss</span></td><td class="">D+5.3<span class="pe-off">off by 1.7</span></td></tr>
+                    <tr><td>Minnesota</td><td>D+10.2</td><td class="pe-big">D+1.7<span class="pe-off">off by 8.5</span><span class="pe-tag">Larger miss</span></td><td class="">D+5.2<span class="pe-off">off by 5.0</span></td></tr>
+                    <tr><td>Nebraska</td><td>R+6.2</td><td class="">R+4.5<span class="pe-off">off by 1.7</span></td><td class="pe-big">R+3.7<span class="pe-off">off by 2.5</span><span class="pe-tag">Larger miss</span></td></tr>
+                    <tr><td>New Hampshire</td><td>D+13.7</td><td class="pe-big">D+6.6<span class="pe-off">off by 7.1</span><span class="pe-tag">Larger miss</span></td><td class="">D+8.0<span class="pe-off">off by 5.7</span></td></tr>
+                    <tr><td>North Carolina</td><td>D+19.8</td><td class="pe-big">D+9.5<span class="pe-off">off by 10.3</span><span class="pe-tag">Larger miss</span></td><td class="">D+11.0<span class="pe-off">off by 8.8</span></td></tr>
+                    <tr><td>Ohio</td><td>D+4.8</td><td class="pe-big">D+0.8<span class="pe-off">off by 4.0</span><span class="pe-tag">Larger miss</span></td><td class="">D+2.8<span class="pe-off">off by 2.0</span></td></tr>
+                    <tr><td>Rhode Island</td><td>D+37.6</td><td class="pe-big">D+26.4<span class="pe-off">off by 11.2</span><span class="pe-tag">Larger miss</span></td><td class="">D+29.3<span class="pe-off">off by 8.3</span></td></tr>
+                    <tr><td>South Carolina</td><td>D+4.5</td><td class="pe-big">R+3.9<span class="pe-off">off by 8.4</span><span class="pe-tag">Larger miss</span></td><td class="">R+2.6<span class="pe-off">off by 7.1</span></td></tr>
+                    <tr><td>Texas</td><td>D+12.1</td><td class="pe-big">D+1.5<span class="pe-off">off by 10.6</span><span class="pe-tag">Larger miss</span></td><td class="">D+2.6<span class="pe-off">off by 9.5</span></td></tr>
+                    <tr class="pe-avg"><td>Average miss</td><td></td><td class="pe-big">off by 6.8<span class="pe-tag">Larger miss</span></td><td>off by 5.1</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
