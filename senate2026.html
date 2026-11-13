@@ -456,6 +456,50 @@
             top: 68px;
             align-self: flex-start;
         }
+        .won-check {
+            width: 13px; height: 13px;
+            margin-left: 5px;
+            vertical-align: -2px;
+            fill: none;
+            stroke: #15803d;
+            stroke-width: 2.6;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .brier-board {
+            max-width: 420px;
+            margin: 4px 0 8px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 14px 16px 12px;
+            font-size: 15px;
+            color: var(--ink-2);
+            background: #fff;
+        }
+        .bb-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--ink);
+        }
+        .bb-sub { font-size: 13px; color: #9ca3af; margin: 3px 0 9px; }
+        .bb-list { list-style: none; margin: 0; padding: 0; counter-reset: bb; }
+        .bb-list li {
+            display: flex; justify-content: space-between; gap: 8px;
+            padding: 6px 0;
+            border-top: 1px solid #f3f4f6;
+            counter-increment: bb;
+        }
+        .bb-list li:first-child { border-top: none; }
+        .bb-list li .bb-name::before { content: counter(bb) ". "; color: #9ca3af; }
+        .bb-list li.bb-base .bb-name::before { content: "\2014  "; }
+        .bb-val { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--ink); }
+        .bb-me .bb-name, .bb-me .bb-val { color: var(--ink); font-weight: 700; }
+        .bb-name a { color: inherit; text-decoration: none; border-bottom: 1px dotted #d1d5db; }
+        .bb-name a:hover { color: var(--ink); border-bottom-color: currentColor; }
+        .bb-base { color: #9ca3af; }
+        .bb-base .bb-val { color: #9ca3af; font-weight: 500; }
 
         @media (max-width: 680px) {
             .map-with-nav { flex-direction: column; }
@@ -779,7 +823,7 @@
     <div class="side-stat dem-side">
         <img src="schumer_cartoon.png" class="side-cartoon" alt="Schumer">
         <div>
-            <div class="side-stat-party dem">Democrats</div>
+            <div class="side-stat-party dem">Democrats<svg class="won-check" viewBox="0 0 16 16" aria-label="Won the Senate"><path d="M2.5 8.5 L6.2 12 L13.5 4"/></svg></div>
             <div class="side-stat-pct dem" id="heroDemPct"></div>
             <div class="side-stat-label">chance of majority</div>
         </div>
@@ -837,6 +881,17 @@
             <div class="mleg"><div class="mleg-sw" style="background:#c084fc"></div>Toss-up (40–60%)</div>
             <div class="mleg"><div class="mleg-sw" style="background:#f87171"></div>Lean Republican (60–80%)</div>
             <div class="mleg"><div class="mleg-sw" style="background:#dc2626"></div>Safe Republican (80–100%)</div>
+        </div>
+        <div class="brier-board">
+            <div class="bb-title">Brier score</div>
+            <div class="bb-sub">Final forecasts, 34 called races</div>
+            <ol class="bb-list">
+                <li><span class="bb-name"><a href="https://electionbettingodds.com/" target="_blank" rel="noopener">Betting odds</a></span><span class="bb-val">0.0564</span></li>
+                <li><span class="bb-name"><a href="https://fiftyplusone.news/forecast/senate" target="_blank" rel="noopener">FiftyPlusOne</a></span><span class="bb-val">0.0635</span></li>
+                <li><span class="bb-name"><a href="https://theoelections.com/national.html" target="_blank" rel="noopener">Theo</a></span><span class="bb-val">0.0717</span></li>
+                <li class="bb-me"><span class="bb-name">Jack's model</span><span class="bb-val">0.0721</span></li>
+                <li class="bb-base"><span class="bb-name">Coin flip</span><span class="bb-val">0.2500</span></li>
+            </ol>
         </div>
     </div>
 
@@ -1258,7 +1313,7 @@
                     ...(state.other > 0 ? [{ label: 'Other', pct: state.other }] : [])
                 ].sort((a, b) => b.pct - a.pct)
                  .map(l => `${l.label}: ${l.pct}%<br>${em(l.pct)}`);
-                tt.html(`<strong>${state.name}</strong><br>${lines.join('<br>')}`)
+                tt.html(`<strong>${state.name}</strong><br>${lines.join('<br>')}${resultNoteHtml(source, state.name)}`)
                   .style('left', (event.pageX + 12) + 'px').style('top', (event.pageY - 36) + 'px')
                   .classed('show', true);
                 d3.selectAll('.state').classed('highlight', s => s.properties.name === state.name);
@@ -1289,6 +1344,87 @@
         const odds = dataSources[source].stateOdds;
         d3.selectAll('.state').transition().duration(280)
             .attr('fill', d => { const o=odds[d.properties.name]; return o?getStateColor(o.rep):'#e5e7eb'; });
+        drawResultMarks(source);
+    }
+
+    // ── ELECTION RESULTS (Nov 3, 2026) ───────────────────────────────────────
+    // Winner of each race: 'rep', 'dem' or 'other'. Alaska is left out while it is uncalled.
+    const RESULTS = {
+        'Alabama':'rep', 'Arkansas':'rep', 'Colorado':'dem', 'Delaware':'dem', 'Florida':'rep',
+        'Georgia':'dem', 'Idaho':'rep', 'Illinois':'dem', 'Iowa':'dem', 'Kansas':'dem',
+        'Kentucky':'rep', 'Louisiana':'rep', 'Maine':'dem', 'Massachusetts':'dem', 'Michigan':'dem',
+        'Minnesota':'dem', 'Mississippi':'dem', 'Montana':'rep', 'Nebraska':'rep', 'New Hampshire':'dem',
+        'New Jersey':'dem', 'New Mexico':'dem', 'North Carolina':'dem', 'Ohio':'dem', 'Oklahoma':'rep',
+        'Oregon':'dem', 'Rhode Island':'dem', 'South Carolina':'dem', 'South Dakota':'rep', 'Tennessee':'rep',
+        'Texas':'dem', 'Virginia':'dem', 'West Virginia':'rep', 'Wyoming':'rep'
+    };
+    // Small states get a smaller symbol; a few centroids need nudging (fractions of map width)
+    const RESULT_SMALL_STATES = new Set(['Rhode Island','Delaware','New Jersey','Massachusetts','New Hampshire']);
+    const RESULT_NUDGE = { 'Florida':[0.012,0.004], 'Louisiana':[-0.006,-0.004], 'Michigan':[0.006,0.012],
+        'Idaho':[0,0.012], 'Kentucky':[0.004,0], 'Massachusetts':[-0.004,-0.002], 'New Hampshire':[0.001,0.004] };
+
+    let mapPath = null, mapFeatures = null, mapW = 0;
+
+    // Forecast favourite for a state under the given source: { party, pct }
+    function resultFavourite(o) {
+        const probs = { rep:o.rep||0, dem:o.dem||0, other:o.other||0 };
+        const party = Object.keys(probs).reduce((a,b) => probs[b] > probs[a] ? b : a);
+        return { party, pct: probs[party] };
+    }
+
+    // Italic line added to the bottom of a state's tooltip once its race is called
+    function resultNoteHtml(source, name) {
+        const o = dataSources[source].stateOdds[name], winner = RESULTS[name];
+        if (!o || !winner) return '';
+        const adj  = { rep:'Republican', dem:'Democratic', other:'independent' };
+        const noun = { rep:'Republicans', dem:'Democrats', other:'the independent' };
+        const f = resultFavourite(o);
+        const pct = (+f.pct).toFixed(1) + '%';
+        const text = f.pct < 60
+            ? `This state was forecasted as a tossup (${adj[f.party]} at ${pct}, which is between 40% and 60%) and was won by ${noun[winner]}.`
+            : `This state was forecasted as likely ${adj[f.party]} (${pct}), and was ${f.party === winner ? 'won' : 'lost'} by that party.`;
+        return `<div style="max-width:240px;margin-top:6px;padding-top:6px;border-top:1px solid #f3f4f6;font-style:italic;font-size:12px;line-height:1.45;color:#6b7280">${text}</div>`;
+    }
+
+    function drawResultMarks(source) {
+        const svg = d3.select('#map');
+        svg.select('.result-marks').remove();
+        if (!mapPath || !mapFeatures) return;
+        const odds = dataSources[source].stateOdds;
+        const g = svg.append('g').attr('class','result-marks').style('pointer-events','none');
+        const W = mapW;
+        const base = Math.max(7, W*0.0105);          // half-size of the symbol
+        const symbols = g;
+
+        mapFeatures.forEach(d => {
+            const name = d.properties.name, o = odds[name], winner = RESULTS[name];
+            if (!o || !winner) return;
+            const { party: fav, pct: pFav } = resultFavourite(o);
+            const hit = fav === winner;
+            // 50% favourite -> faint, 100% favourite -> full strength
+            const conf = Math.min(1, Math.max(0, (pFav - 50) / 50));
+            const alpha = 0.18 + 0.82*conf;
+
+            let [x, y] = mapPath.centroid(d);
+            if (!isFinite(x) || !isFinite(y)) return;
+            const nd = RESULT_NUDGE[name];
+            if (nd) { x += nd[0]*W; y += nd[1]*W; }
+            const s = RESULT_SMALL_STATES.has(name) ? base*0.62 : base;
+            // Toss-ups (favourite at 40-60%) get a neutral tilde instead of a check or X
+            const tossup = pFav < 60;
+            const color = tossup ? '#374151' : hit ? '#15803d' : '#b91c1c';
+            const sym = tossup
+                ? `M${-s*0.85},${s*0.15} C${-s*0.55},${-s*0.55} ${-s*0.15},${-s*0.45} 0,0 S${s*0.55},${s*0.45} ${s*0.85},${-s*0.15}`
+                : hit
+                ? `M${-s*0.85},${s*0.05} L${-s*0.25},${s*0.65} L${s*0.9},${-s*0.65}`
+                : `M${-s*0.7},${-s*0.7} L${s*0.7},${s*0.7} M${s*0.7},${-s*0.7} L${-s*0.7},${s*0.7}`;
+
+            symbols.append('path').attr('d', sym).attr('fill','none')
+                .attr('transform', `translate(${x},${y})`)
+                .attr('opacity', tossup ? 0.85 : alpha)
+                .attr('stroke', color)
+                .attr('stroke-width', s*0.28).attr('stroke-linecap','round').attr('stroke-linejoin','round');
+        });
     }
 
     function createMap() {
@@ -1302,8 +1438,10 @@
         const path = d3.geoPath().projection(proj);
 
         d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json').then(us => {
+            mapPath = path; mapW = W;
+            mapFeatures = topojson.feature(us,us.objects.states).features;
             svg.selectAll('.state')
-                .data(topojson.feature(us,us.objects.states).features)
+                .data(mapFeatures)
                 .enter().append('path').attr('class','state').attr('d',path)
                 .attr('fill', d => { const o=dataSources[currentSource].stateOdds[d.properties.name]; return o?getStateColor(o.rep):'#e5e7eb'; })
                 .style('cursor', d => dataSources.jack.stateOdds[d.properties.name] ? 'pointer' : 'default')
@@ -1320,12 +1458,13 @@
                             ...(oth>0 ? [{ label: 'Other', pct: oth }] : [])
                         ].sort((a,b) => b.pct - a.pct)
                          .map(l => `${l.label}: ${l.pct}%<br>${em(l.pct)}`);
-                        tt.html(`<strong>${name}</strong><br>${lines.join('<br>')}`);
+                        tt.html(`<strong>${name}</strong><br>${lines.join('<br>')}${resultNoteHtml(currentSource, name)}`);
                     } else { tt.html(`<strong>${name}</strong><br>No Senate race in 2026`); }
                     tt
                       .style('left',(event.pageX+12)+'px').style('top',(event.pageY-36)+'px').classed('show',true);
                 })
                 .on('mouseout',()=>{ tt.classed('show',false); });
+            drawResultMarks(currentSource);
         });
     }
 
