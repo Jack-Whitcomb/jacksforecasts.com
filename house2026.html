@@ -302,6 +302,51 @@
             padding: 0;
         }
 
+        /* ── OTHER FORECASTS TOGGLE ──────────────────────── */
+
+        .vote-sub { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+        .annot-wrap {
+            display: flex; align-items: center; gap: 6px;
+            font-size: 12px; color: var(--ink-2);
+            cursor: pointer; user-select: none; white-space: nowrap;
+        }
+        .annot-wrap input { cursor: pointer; }
+        .other-fc-legend {
+            display: flex; flex-wrap: wrap; gap: 6px 18px;
+            margin-top: 10px; font-size: 12px; color: var(--ink-2);
+            font-variant-numeric: tabular-nums;
+        }
+        .other-fc-legend[hidden] { display: none; }
+        .other-fc-legend a, .cb-name a { color: inherit; text-decoration: none; border-bottom: 1px dotted #d1d5db; }
+        .other-fc-legend a:hover, .cb-name a:hover { color: var(--ink); border-bottom-color: currentColor; }
+        .ofc-shape { display: inline-block; width: 14px; margin-right: 4px; color: #6b7280; font-size: 11px; text-align: center; }
+        .ofc-line { height: 2.5px; background: #6b7280; vertical-align: 3px; }
+
+        /* ── CONFIDENCE LEADERBOARD ──────────────────────── */
+
+        .conf-board {
+            grid-column: 1 / -1;
+            max-width: 620px;
+            border: 1px solid var(--rule);
+            border-radius: 6px;
+            padding: 14px 16px 10px;
+            background: #fff;
+        }
+        .cb-title { font-size: 14px; font-weight: 700; color: var(--ink); margin-bottom: 8px; line-height: 1.35; }
+        .cb-list { list-style: none; margin: 0; padding: 0; }
+        .cb-list li {
+            display: grid; grid-template-columns: 22px 120px 1fr 52px; align-items: center; gap: 8px;
+            padding: 6px 0; border-top: 1px solid #f3f4f6; font-size: 14px; color: var(--ink-2);
+        }
+        .cb-list li:first-child { border-top: none; }
+        .cb-rank { color: #9ca3af; }
+        .cb-bar { height: 8px; background: #f3f4f6; border-radius: 4px; overflow: hidden; }
+        .cb-bar span { display: block; height: 100%; background: #93c5fd; border-radius: 4px; }
+        .cb-val { text-align: right; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+        .cb-me .cb-name, .cb-me .cb-val { color: var(--ink); font-weight: 700; }
+        .cb-me .cb-bar span { background: #1d4ed8; }
+        .cb-quip { margin-top: 8px; padding-top: 8px; border-top: 1px solid #f3f4f6; font-style: italic; font-size: 13px; color: var(--ink-2); }
+
         /* ── POLLS TOGGLE ────────────────────────────────── */
 
         .polls-toggle {
@@ -416,7 +461,7 @@
             .top-band { padding: 16px 16px 8px; flex-wrap: wrap; gap: 12px; }
             .band-center { flex-basis: 100%; order: -1; padding: 0; }
             .page { padding: 0 16px 72px; }
-            .charts-row { grid-template-columns: 1fr; gap: 40px; }
+            .charts-row { grid-template-columns: minmax(0, 1fr); gap: 40px; }
             .chart-area { height: 240px; }
             .side-stat-pct { font-size: 36px; }
             .side-cartoon { height: 64px; }
@@ -546,9 +591,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="chart-col-sub">Bias-adjusted point forecast · shaded band = 95% CI for final vote shares</div>
+                <div class="chart-col-sub vote-sub">
+                    <span>Bias-adjusted point forecast · shaded band = 95% CI for final vote shares</span>
+                    <label class="annot-wrap"><input type="checkbox" id="showOtherForecasts"> Show other forecasts</label>
+                </div>
                 <div class="chart-area">
                     <canvas id="voteChart"></canvas>
+                </div>
+                <div class="other-fc-legend" id="otherFcLegend" hidden>
+                    <span><span class="ofc-shape">&#9650;</span><a href="https://www.realclearpolling.com/polls/state-of-the-union/generic-congressional-vote" target="_blank" rel="noopener">RCP average</a> D 52.1 · R 43.3</span>
+                    <span><span class="ofc-shape">&#9670;</span><a href="https://fiftyplusone.news/forecast/house" target="_blank" rel="noopener">FiftyPlusOne</a> D 52.8 · R 44.1</span>
+                    <span><span class="ofc-shape ofc-line"></span>Jack's model D 52.0 · R 44.9</span>
                 </div>
             </div>
 
@@ -565,6 +618,18 @@
                 <div class="chart-area">
                     <canvas id="probChart"></canvas>
                 </div>
+            </div>
+
+            <div class="conf-board">
+                <div class="cb-title">The &ldquo;who was most confident Democrats were gonna win the House?&rdquo; leaderboard</div>
+                <ol class="cb-list">
+                    <li class="cb-me"><span class="cb-rank">1.</span><span class="cb-name">Jack's model</span><span class="cb-bar"><span style="width:99.2%"></span></span><span class="cb-val">99.2%</span></li>
+                    <li><span class="cb-rank">2.</span><span class="cb-name"><a href="https://fiftyplusone.news/forecast/house" target="_blank" rel="noopener">FiftyPlusOne</a></span><span class="cb-bar"><span style="width:98%"></span></span><span class="cb-val">98.0%</span></li>
+                    <li><span class="cb-rank">3.</span><span class="cb-name"><a href="https://theoelections.com/national.html" target="_blank" rel="noopener">Theo</a></span><span class="cb-bar"><span style="width:94.6%"></span></span><span class="cb-val">94.6%</span></li>
+                    <li><span class="cb-rank">4.</span><span class="cb-name"><a href="https://electionbettingodds.com/" target="_blank" rel="noopener">Betting odds</a></span><span class="cb-bar"><span style="width:94.1%"></span></span><span class="cb-val">94.1%</span></li>
+                    <li><span class="cb-rank">5.</span><span class="cb-name">Jack's gut</span><span class="cb-bar"><span style="width:90%"></span></span><span class="cb-val">90.0%</span></li>
+                </ol>
+                <div class="cb-quip">I've met forecasters who calibrate, and they're all cowards!</div>
             </div>
 
             <details class="polls-toggle" id="pollsToggle">
@@ -848,12 +913,38 @@ renderPollsTable();
 // Actual national House popular vote so far (Wikipedia infobox, as of 2:35 PM ET Nov 12, 2026; counting continues)
 const ACTUAL_VOTE = { dem: 56.1, rep: 42.4 };
 
+// Other final generic-ballot forecasts, shown when "Show other forecasts" is ticked
+const OTHER_FORECASTS = [
+    { name: 'RCP average',  shape: 'triangle', dem: 52.1, rep: 43.3 },
+    { name: 'FiftyPlusOne', shape: 'diamond',  dem: 52.8, rep: 44.1 }
+];
+let showOtherForecasts = false;
+
+function drawShape(ctx, shape, x, y, r, color) {
+    ctx.beginPath();
+    if (shape === 'triangle') {
+        ctx.moveTo(x, y - r); ctx.lineTo(x + r * 0.95, y + r * 0.7); ctx.lineTo(x - r * 0.95, y + r * 0.7);
+    } else {
+        ctx.moveTo(x, y - r); ctx.lineTo(x + r * 0.8, y); ctx.lineTo(x, y + r); ctx.lineTo(x - r * 0.8, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = '#fff'; ctx.fill();
+    ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke();
+}
+
 // Draws the actual vote shares as ringed dots with labels at the end of the forecast lines
 const actualVoteMarks = {
     id: 'actualVoteMarks',
     afterDatasetsDraw(chart) {
         const { ctx, scales: { x, y } } = chart;
         const px = x.getPixelForValue(new Date(DATES[DATES.length - 1] + 'T00:00:00').getTime());
+        if (showOtherForecasts) {
+            // On the finish line (election day), same x as the end of Jack's lines and the actual results
+            OTHER_FORECASTS.forEach(f => {
+                drawShape(ctx, f.shape, px, y.getPixelForValue(f.dem), 4.5, '#1d4ed8');
+                drawShape(ctx, f.shape, px, y.getPixelForValue(f.rep), 4.5, '#dc2626');
+            });
+        }
         [['dem', '#1d4ed8'], ['rep', '#dc2626']].forEach(([k, color]) => {
             const py = y.getPixelForValue(ACTUAL_VOTE[k]);
             ctx.save();
@@ -874,7 +965,7 @@ const actualVoteMarks = {
     }
 };
 
-new Chart(document.getElementById('voteChart').getContext('2d'), {
+const voteChart = new Chart(document.getElementById('voteChart').getContext('2d'), {
     type: 'line',
     plugins: [actualVoteMarks],
     data: {
@@ -930,6 +1021,12 @@ new Chart(document.getElementById('voteChart').getContext('2d'), {
             }
         }
     }
+});
+
+document.getElementById('showOtherForecasts').addEventListener('change', e => {
+    showOtherForecasts = e.target.checked;
+    document.getElementById('otherFcLegend').hidden = !showOtherForecasts;
+    voteChart.update('none');
 });
 
 // ── WIN PROBABILITY CHART (dynamic) ──────────────────────────────────────────
